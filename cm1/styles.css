@@ -1,0 +1,301 @@
+body {
+	height: 100%;
+}
+html {
+	height: 100%;
+}
+
+select .header {
+	font-style: italic;
+}
+
+textarea {
+	background-image: url('../res/np_subversion_turtle.gif');
+	background-repeat: no-repeat;
+	background-position: bottom right;
+}
+
+fieldset {
+	clear: both;
+	background-color: #FAFAFB;
+}
+
+dl {
+	margin: 0 0 0 2em;
+	padding: 10px;
+}
+dt {
+	margin: 0 0 5px 0;
+	clear: both;
+	float: left;
+	width: 100px;
+}
+dd {
+	margin: 0 0 5px 0;
+}
+
+table {
+	margin: 10px 0 10px 0;
+	width: 100%;
+	border: 1px solid gray;
+	background-color: #FAFAFB;
+}
+table tr th {
+	text-align: left;
+	font-size: 11px;
+	font-weight: bold;
+	background-color: #fff;
+}
+table td {
+	margin: 1px;
+	padding: 3px 2px;
+	border-bottom: 1px solid #eee;
+}
+
+ins {
+	padding: 1px 3px;
+	background-color: #C0FFC0;
+}
+del {
+	padding: 1px 3px;
+	background-color: #FFCCCC;
+}
+
+.hidden {
+	display: none;
+}
+
+.clearer {
+	clear: both;
+}
+
+.errorbox, .infobox {
+	margin: 10px 0;
+	padding: 10px;
+	border: 1px solid;
+	font-weight: bold;
+}
+
+.infobox {
+	border-color: #666;
+	color: #333;
+	background: #fff;
+}
+.infobox a {
+	text-decoration: underline;
+	color: #8BB73C;
+}
+.errorbox {
+	border-color: #993333;
+	color: #993333;
+	background: #fff0f0;
+}
+.errorbox a {
+	text-decoration: underline;
+	color: #000;
+}
+
+.buttons {
+	margin: 10px 3px 0 0;
+	text-align: right;
+}
+
+.added {
+	color: #640064;
+}
+.deleted {
+	color: #640000;
+}
+.updated {
+	color: #000000;
+}
+.conflict {
+	color: #ff0000;
+}
+.merged {
+	color: #006400;
+}
+.error {
+	color: #ff0000;
+}
+
+#header {
+	margin: 15px 0;
+	padding: 0;
+	background: transparent url('../res/np_subversion_mod_header.gif') top right no-repeat;
+	border-bottom: 1px solid #ccc; 
+	height: 48px;
+}
+#header dl {
+	margin: 0;
+	padding: 8px 0 0 0;
+}
+#header dt {
+	margin: 0;
+	clear: both;
+	float: left;
+	font-weight: bold;
+	width: 75px;
+}
+#header dd {
+	margin: 0;
+}
+
+#authentication {
+	margin: 10px 0;
+}
+
+#commit select {
+	width: 100%;
+}
+
+#message {
+	width: 100%;
+	height: 110px
+}
+
+#files tr {
+	cursor: pointer;
+}
+#files td {
+	background: #f0f0f0;
+}
+#files tr.over td {
+	background: #fff;
+}
+#files td input {
+	margin-bottom: 3px;
+}
+#files tr.footer td {
+	padding: 5px 2px 3px 2px;
+	border-top: 1px solid #999;
+	background: #fff;
+}
+#files tr.footer td label {
+	padding: 0 0 5px 3px;
+}
+
+#diffHeader {
+	margin-bottom: 5px;
+	height: 48px;
+}
+
+#diffHeader h1 {
+	margin: 0;
+	padding: 10px 0;
+	text-align: left;
+	font-size: 12px;
+	float: left;
+	width: 48%;
+}
+
+#filesIdentical {
+	position: absolute;
+	top: 100px;
+	left: 210px;
+	padding-top: 30px;
+	font-size: 13px;
+	text-align: center;
+	z-index: 500;
+	width: 300px;
+	height: 80px;
+	border: 1px solid #999;
+	background: #ffffee;
+	-moz-border-radius: 8px;
+	-webkit-border-radius: 8px;
+}
+
+#bar {
+	margin: 0;
+	padding: 0;
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 100;
+	background: #eee;
+	border: 1px solid #ccc;
+	cursor: pointer;
+	width: 10px;
+	height: 400px;
+}
+
+#diffContainer {
+	margin: 0;
+	padding: 0;
+	position: relative;
+}
+
+#diff {
+	position: relative;
+	height: 70%;
+}
+
+#diff table {
+	margin: 0;
+	border: none;
+}
+
+#diff table th {
+	border-bottom: 2px solid #ccc;
+}
+#diff table td {
+	font-family: "Courier new",Courier,monospace;
+	font-size: 11px;
+	white-space: nowrap;
+	height: 1em;
+}
+#diff table td.lineNumber {
+	width: 5%;
+}
+
+#diff .diffFile {
+	overflow: auto;
+	background: #fafafb;
+	border: 1px solid #ccc;
+	float: left;
+	width: 48.5%;
+	height: 400px;
+}
+#file1 {
+	margin-left: 10px;
+}
+
+#diff #file2 {
+	float: right;
+}
+
+#diff .diff-row-added {
+	background-color: #c0ffc0;
+}
+#diff .diff-row-deleted {
+	background-color: #ffcccc;
+}
+#diff .diff-row-inexistent {
+	background-color: #e5e5e5;
+}
+
+.mod, #cursor {
+	position: absolute;
+	top: -1px;
+	left: -1px;
+	line-height: 0;
+	font-size: 0;
+	z-index: 500;
+	width: 11px;
+	height: 6px;
+}
+
+.mod {
+	z-index: 200;
+}
+.mod.added {
+	background: #7ad37a;
+}
+.mod.deleted {
+	background: #db7c7c;
+}
+#cursor {
+	border: 1px solid black;
+	width: 10px;
+	z-index: 1000;
+}

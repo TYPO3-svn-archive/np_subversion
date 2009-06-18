@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<T3locallang>
+	<data type="array">
+		<languageKey index="default" type="array">
+			<label index="title">Subversion</label>
+			<label index="local_path">Local path</label>
+			<label index="repository">Repository</label>
+			<label index="root">Rep. root</label>
+			<label index="note">Note</label>
+			<label index="no_files_changed">No files were changed or added since the last commit.</label>
+			<label index="contains_unversioned_items">The folder contains unversioned items!</label>
+			<label index="contains_local_modifications">There are local modifications in your working copy!</label>
+			<label index="no_files_marked">No files marked for inclusion.</label>
+			<label index="file_not_in_workingcopy">The file "%s" does not belong to this working copy</label>
+			<label index="authentication_header">Authentication</label>
+			<label index="authentication_implicit">default authentication</label>
+			<label index="authentication_explicit">authenticate as:</label>
+			<label index="authentication_failed_header">Authentication failed!</label>
+			<label index="authentication_failed">Authentication failed!&lt;br /&gt;Please enter your credentials below.</label>
+			<label index="authenticate_as">authenticate as "%s"</label>
+			<label index="no_authentication">&lt;em&gt;anonymous&lt;/em&gt;</label>
+			<label index="username_label">Username:</label>
+			<label index="password_label">Password:</label>
+			<label index="save_auth_label">Remember:</label>
+			<label index="save_auth_notice">Save username &amp; password as cookie. Please read the security advices!</label>
+			<label index="error_log_message_file">Could not write temporary Log message file</label>
+			<label index="no_checkout_path">No checkout path</label>
+			<label index="no_export_target">"%s" is no export target</label>
+			<label index="error_creating_backup_folder">An error occured while creating backup folder</label>
+			<label index="error_renaming_target_folder">An error occured while renaming target folder</label>
+			<label index="error_renaming_tempt_folder">An error occured while renaming temporary target folder</label>
+			<label index="backup_label">Create backup (at "%s")</label>
+			<label index="backup_stored_at">Backup stored at "%s"</label>
+			<label index="file_deleted">File "%s" has been deleted</label>
+			<label index="no_backup_stored">no backup created</label>
+		</languageKey>
+	</data>
+</T3locallang>

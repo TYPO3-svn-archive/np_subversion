@@ -1,0 +1,23 @@
+ #cat=others;type=string;label=Path to subversion:Set the path to your svn executable.
+svn_path = /usr/local/bin/svn
+
+ #cat=others;type=string;label=Path to SVN configuration:Instructs Subversion to read configuration information from the specified directory.
+svn_config_dir =
+
+ #cat=others;type=string;label=Commit message encoding:Tells Subversion that your commit message is encoded in the charset provided. If empty the TYPO3 default charset is used ($TYPO3_CONF_VARS['BE']['forceCharset']).
+svn_encoding =
+
+ #cat=others;type=string;label=UMASK (User File Creation Mode Mask):Permissions of newly created files through update, checkout and export commands. Leave empty to use default file system mode.
+umask =
+
+ #cat=others;type=string;label=Backup path:Path for backups, relative to PATH_site.
+backup_path = uploads/tx_npsubversion
+
+ #cat=others;type=int;label=Cookie lifetime:Lifetime of SVN authentication cookie in seconds (0 = Session, -1 = disabled).
+cookie_lifetime = 2592000
+
+ #cat=others;type=boolean;label=Display .svn folders:If you tick this checkbox .svn directories won't be hidden from the file list module.
+show_svn_dirs = 0
+
+ #cat=others;type=string;label=Enable logging of svn commands:Enable logging for the specified svn commands (comma separated list). This requires a devlog extension to be installed and [SYS][enable_DLOG] to be set.
+log_svn_commands = commit,update,export

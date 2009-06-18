@@ -1,0 +1,397 @@
+<!-- ###SUBPART_HEADER### begin -->
+<div id="header">
+	<dl>
+		<dt>###LOCAL_PATH_LABEL###</dt>
+		<dd><span title="###LOCAL_PATH###">###LOCAL_PATH_CROPPED###</span></dd>
+		<dt>###REPOSITORY_LABEL###</dt>
+		<dd><span title="###REPOSITORY###">###REPOSITORY_CROPPED###</span></dd>
+		<dt>###ROOT_LABEL###</dt>
+		<dd><span title="###ROOT###">###ROOT_CROPPED###</span></dd>
+	</dl>
+</div>
+<!-- ###SUBPART_HEADER### end -->
+
+<!-- ###SUBPART_PRE_COMMIT### begin -->
+	<div id="commit">
+		###ERROR###
+		<fieldset>
+			<legend>Message:</legend>
+			<br />
+			###LOG_MESSAGE_SELECTOR###
+			<br /><br />
+			<textarea name="modVars[message]" id="message">###LOG_MESSAGE###</textarea>
+		</fieldset>
+		<br />
+
+		<fieldset>
+			<legend>Changes made</legend>
+			<table id="files">
+				<tr>
+					<th>
+						File
+					</th>
+					<th>
+						Extension
+					</th>
+					<th>
+						Text status
+					</th>
+					<th>
+						Property status
+					</th>
+					<th>
+						Lock
+					</th>
+					<th>
+						Diff
+					</th>
+				</tr>
+				<!-- ###SUBPART_FILE### begin -->
+					<tr onmouseover="this.className='over'" onmouseout="this.className=''">
+						<td onmousedown="toggleCheckbox('###CHECKBOX_ID###')">
+							###CHECKBOX### ###FILE_ICON### <span title="###FILE_PATH###">###FILE_PATH_RELATIVE###</span>
+						</td>
+						<td onmousedown="toggleCheckbox('###CHECKBOX_ID###')">
+							###FILE_EXTENSION###
+						</td>
+						<td onmousedown="toggleCheckbox('###CHECKBOX_ID###')">
+							###FILE_TEXT_STATUS###
+						</td>
+						<td onmousedown="toggleCheckbox('###CHECKBOX_ID###')">
+							###FILE_PROPERTY_STATUS###
+						</td>
+						<td onmousedown="toggleCheckbox('###CHECKBOX_ID###')">
+							###FILE_LOCK###
+						</td>
+						<td>
+							###FILE_DIFF_ICON###
+						</td>
+					</tr>
+				<!-- ###SUBPART_FILE### end -->
+				<tr class="footer">
+					<td colspan="6"><input type="checkbox" id="select_all" onclick="toggleCheckboxes(this.checked, 'files')" /> <label for="select_all">select / deselect all</label></td>
+				</tr>
+			</table>
+			<script type="text/javascript">toggleMasterCheckbox('select_all', 'files');</script>
+		</fieldset>
+		<br />
+		###AUTHENTICATION###
+		###HIDDENFIELDS###
+		<div class="buttons">
+			<input type="submit" name="ok" value=" - OK - " />
+		</div>
+	<!-- ###SUBPART_FILES### end -->
+
+	</div>
+
+<!-- ###SUBPART_PRE_COMMIT### end -->
+
+<!-- ###SUBPART_POST_COMMIT### begin -->
+	<div id="commit">
+		<table>
+			<tr>
+				<th>
+					Action
+				</th>
+				<th>
+					Path
+				</th>
+			</tr>
+			<!-- ###SUBPART_ROW### begin -->
+				<tr class="###CSS_CLASS###">
+					<td class="###CSS_CLASS###">
+						###ACTION###
+					</td>
+					<td class="###CSS_CLASS###">
+						###MESSAGE###
+					</td>
+				</tr>
+			<!-- ###SUBPART_ROW### end -->
+		</table>
+	</div>
+<!-- ###SUBPART_POST_COMMIT### end -->
+
+<!-- ###SUBPART_POST_UPDATE### begin -->
+	<div id="update">
+		<table>
+			###ROWS###
+		</table>
+	</div>
+<!-- ###SUBPART_POST_UPDATE### end -->
+
+<!-- ###SUBPART_POST_CHECKOUT### begin -->
+	<div id="checkout">
+		<table>
+			###ROWS###
+		</table>
+	</div>
+<!-- ###SUBPART_POST_CHECKOUT### end -->
+
+<!-- ###SUBPART_PRE_EXPORT### begin -->
+	<div id="export">
+		###ERROR###
+		<br />
+		<!-- ###SUBPART_BACKUP### begin -->
+			<label><input type="checkbox" name="modVars[backup]" value="1"###BACKUP_CHECKED### /> ###BACKUP_LABEL###</label>
+			<br /><br />
+		<!-- ###SUBPART_BACKUP### end -->
+		###AUTHENTICATION###
+		###HIDDENFIELDS###
+		<div class="buttons">
+			<input type="submit" name="ok" value=" - OK - " />
+		</div>
+	</div>
+<!-- ###SUBPART_PRE_EXPORT### end -->
+
+<!-- ###SUBPART_POST_EXPORT### begin -->
+	<div id="export">
+		<table>
+			###ROWS###
+		</table>
+		<br />
+		###BACKUP_PATH###
+	</div>
+<!-- ###SUBPART_POST_EXPORT### end -->
+
+<!-- ###SUBPART_FILE_ROW### begin -->
+	<tr class="###CSS_CLASS###">
+		<td class="###CSS_CLASS###">
+			###ACTION###
+		</td>
+		<td class="###CSS_CLASS###">
+			###MESSAGE###
+		</td>
+	</tr>
+<!-- ###SUBPART_FILE_ROW### end -->
+<!-- ###SUBPART_MESSAGE_ROW### begin -->
+	<tr class="###CSS_CLASS###">
+		<td colspan="2" class="###CSS_CLASS###">
+			###MESSAGE###
+		</td>
+	</tr>
+<!-- ###SUBPART_MESSAGE_ROW### end -->
+
+<!-- ###SUBPART_AUTHENTICATION_FAILED### begin -->
+	<div id="update">
+		###AUTHENTICATION###
+		###HIDDENFIELDS###
+		<div class="buttons">
+			<input type="submit" name="ok" value=" - OK - " />
+		</div>
+	</div>
+<!-- ###SUBPART_AUTHENTICATION_FAILED### end -->
+
+<!-- ###SUBPART_AUTHENTICATION### begin -->
+	<fieldset>
+		<legend>###HEADER###</legend>
+		<br />
+		<input type="radio" name="modVars[auth_mode]" id="auth_mode_implicit" value="implicit" onchange="toggleAuthMode()"###AUTH_MODE_IMPLICIT_CHECKED### /><label for="auth_mode_implicit"> ###AUTHENTICATION_IMPLICIT### (###AUTHENTICATE_AS###)</label><br /><br />
+		<input type="radio" name="modVars[auth_mode]" id="auth_mode_explicit" value="explicit" onchange="toggleAuthMode()"###AUTH_MODE_EXPLICIT_CHECKED### /><label for="auth_mode_explicit">  ###AUTHENTICATION_EXPLICIT###</label><br /><br />
+		<dl id="authentication_explicit">
+			<dt>
+				<label for="username">###USERNAME_LABEL###</label>
+			</dt>
+			<dd>
+				<input type="text" name="modVars[username]" id="username" value="###USERNAME###" />
+			</dd>
+			<dt>
+				<label for="password">###PASSWORD_LABEL###</label>
+			</dt>
+			<dd>
+				<input type="password" name="modVars[password]" id="password" value="###PASSWORD###" />
+			</dd>
+			<dt>
+				<label for="save_auth">###SAVE_AUTH_LABEL###</label>
+			</dt>
+			<dd>
+				<input type="checkbox" name="modVars[save_auth]" id="save_auth" value="1"###SAVE_AUTH_CHECKED### /> <label for="save_auth"><small>###SAVE_AUTH_NOTICE###</small></label>
+			</dd>
+		</dl>
+	</fieldset>
+	<script language="javascript" type="text/javascript">toggleAuthMode();</script>
+
+<!-- ###SUBPART_AUTHENTICATION### end -->
+
+<!-- ###SUBPART_DIFF### begin -->
+	<div id="diffHeader">
+		<span id="filename">file: <strong>###FILENAME###</strong></span>
+		, Base revision: ###REVISION_SELECTOR###
+		<input type="hidden" name="id" value="###ID###" />
+		<input type="hidden" name="cmd" value="diff" />
+		<h1 id="file1header">###HEADER_FILE1###</h1>
+		<h1 id="file2header">###HEADER_FILE2###</h1>
+	</div>
+	<div id="diffContainer">
+		<div id="filesIdentical" style="display: none">###FILES_IDENTICAL###</div>
+		<div id="bar">
+			<div id="cursor"><!-- --></div>
+		</div>
+		<div id="diff">
+			<div id="file1" class="diffFile">
+				<table cellpadding="0" cellspacing="0">
+					###FILE1_ROWS###
+				</table>
+			</div>
+			<div id="file2" class="diffFile">
+				<table cellpadding="0" cellspacing="0">
+					###FILE2_ROWS###
+				</table>
+			</div>
+			<div class="clearer"><!-- --></div>
+		</div>
+	</div>
+<!-- ###SUBPART_DIFF### end -->
+
+<!-- ###SUBPART_DIFF_ROW_DEFAULT### begin -->
+	<tr class="diff-row">
+		<td class="lineNumber">
+			###LINENUMBER###
+		</td>
+		<td class="content">
+			<pre>###CONTENT###</pre>
+		</td>
+	</tr>
+<!-- ###SUBPART_DIFF_ROW_DEFAULT### end -->
+
+<!-- ###SUBPART_DIFF_ROW_ADDED### begin -->
+	<tr class="diff-row-added">
+		<td class="lineNumber">
+			###LINENUMBER###
+		</td>
+		<td class="content">
+			<pre>###CONTENT###</pre>
+		</td>
+	</tr>
+<!-- ###SUBPART_DIFF_ROW_ADDED### end -->
+
+<!-- ###SUBPART_DIFF_ROW_DELETED### begin -->
+	<tr class="diff-row-deleted">
+		<td class="lineNumber">
+			###LINENUMBER###
+		</td>
+		<td class="content">
+			<pre>###CONTENT###</pre>
+		</td>
+	</tr>
+<!-- ###SUBPART_DIFF_ROW_DELETED### end -->
+
+<!-- ###SUBPART_DIFF_ROW_INEXISTENT### begin -->
+	<tr class="diff-row-inexistent">
+		<td colspan="2" class="content">
+			<pre>###CONTENT###</pre>
+		</td>
+	</tr>
+<!-- ###SUBPART_DIFF_ROW_INEXISTENT### end -->
+
+<!-- ###SUBPART_PRE_DELETE### begin -->
+	<div id="delete">
+		###ERROR###
+		<div class="infobox">Are you sure you want to marke the ###FILE_TYPE### &quot;###FILE_PATH###&quot; deleted?<br />###MODIFICATIONS###</div>
+		<br />
+		<fieldset>
+			<legend>Options:</legend>
+			<br />
+			<label><input type="checkbox" name="force" checked="checked" value="1" /> Force deletion of unversioned &amp; modified files</label>
+		</fieldset>
+		###HIDDENFIELDS###
+		<div class="buttons">
+			<input type="submit" name="ok" value=" - MARK FILE(S) DELETED - " title="delete ###FILE_TYPE###" />
+		</div>
+	</div>
+<!-- ###SUBPART_PRE_DELETE### end -->
+
+<!-- ###SUBPART_POST_DELETE### begin -->
+	<div id="delete">
+		<table>
+			###ROWS###
+		</table>
+	</div>
+<!-- ###SUBPART_POST_DELETE### end -->
+
+<!-- ###SUBPART_PRE_REVERT### begin -->
+	<div id="revert">
+		###ERROR###
+		<fieldset>
+			<legend>Changes made</legend>
+			<table id="files">
+				<tr>
+					<th>
+						File
+					</th>
+					<th>
+						Extension
+					</th>
+					<th>
+						Text status
+					</th>
+					<th>
+						Property status
+					</th>
+					<th>
+						Lock
+					</th>
+					<th>
+						Diff
+					</th>
+				</tr>
+				<!-- ###SUBPART_FILE### begin -->
+					<tr onmouseover="this.className='over'" onmouseout="this.className=''">
+						<td onmousedown="toggleCheckbox('###CHECKBOX_ID###')">
+							###CHECKBOX### ###FILE_ICON### <span title="###FILE_PATH###">###FILE_PATH_RELATIVE###</span>
+						</td>
+						<td onmousedown="toggleCheckbox('###CHECKBOX_ID###')">
+							###FILE_EXTENSION###
+						</td>
+						<td onmousedown="toggleCheckbox('###CHECKBOX_ID###')">
+							###FILE_TEXT_STATUS###
+						</td>
+						<td onmousedown="toggleCheckbox('###CHECKBOX_ID###')">
+							###FILE_PROPERTY_STATUS###
+						</td>
+						<td onmousedown="toggleCheckbox('###CHECKBOX_ID###')">
+							###FILE_LOCK###
+						</td>
+						<td>
+							###FILE_DIFF_ICON###
+						</td>
+					</tr>
+				<!-- ###SUBPART_FILE### end -->
+				<tr class="footer">
+					<td colspan="6"><input type="checkbox" id="select_all" onclick="toggleCheckboxes(this.checked, 'files')" /> <label for="select_all">select / deselect all</label></td>
+				</tr>
+			</table>
+			<script type="text/javascript">toggleMasterCheckbox('select_all', 'files');</script>
+		</fieldset>
+		<br />
+		###HIDDENFIELDS###
+		<div class="buttons">
+			<input type="submit" name="ok" value=" - OK - " title="revert selected files" />
+		</div>
+	<!-- ###SUBPART_FILES### end -->
+	</div>
+<!-- ###SUBPART_PRE_REVERT### end -->
+
+<!-- ###SUBPART_POST_REVERT### begin -->
+	<div id="revert">
+		<table>
+			<tr>
+				<th>
+					Action
+				</th>
+				<th>
+					Path
+				</th>
+			</tr>
+			<!-- ###SUBPART_ROW### begin -->
+				<tr>
+					<td>
+						###ACTION###
+					</td>
+					<td>
+						###MESSAGE###
+					</td>
+				</tr>
+			<!-- ###SUBPART_ROW### end -->
+		</table>
+	</div>
+<!-- ###SUBPART_POST_REVERT### end -->

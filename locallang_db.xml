@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<T3locallang>
+	<meta type="array">
+		<type>database</type>
+		<description>Language labels for database tables/fields belonging to extension 'np_subversion'</description>
+	</meta>
+	<data type="array">
+		<languageKey index="default" type="array">
+			<label index="tx_npsubversion_repository">svn repository</label>
+			<label index="tx_npsubversion_repository.rep_title">repository title</label>
+			<label index="tx_npsubversion_repository.rep_url">repository URL with trailing slash (e.g. "http://svn.domain.com/")</label>
+			<label index="tx_npsubversion_repository.rep_username">username (default user)</label>
+			<label index="tx_npsubversion_repository.rep_password">password (default user)</label>
+			<label index="tx_npsubversion_workingcopy">target definition</label>
+			<label index="tx_npsubversion_workingcopy.wc_title">target definition title</label>
+			<label index="tx_npsubversion_workingcopy.repository">subversion repository</label>
+			<label index="tx_npsubversion_workingcopy.wc_url">checkout URL (e.g. "my_ext/trunk")</label>
+			<label index="tx_npsubversion_workingcopy.wc_type">working copy / export target</label>
+			<label index="tx_npsubversion_workingcopy.wc_type.I.0">working copy</label>
+			<label index="tx_npsubversion_workingcopy.wc_type.I.1">export target</label>
+			<label index="tx_npsubversion_workingcopy.wc_target_type">folder / extension</label>
+			<label index="tx_npsubversion_workingcopy.wc_target_type.I.0">folder</label>
+			<label index="tx_npsubversion_workingcopy.wc_target_type.I.1">extension</label>
+			<label index="tx_npsubversion_workingcopy.wc_extension">extension key</label>
+			<label index="tx_npsubversion_workingcopy.wc_extension_type">extension type</label>
+			<label index="tx_npsubversion_workingcopy.wc_extension_type.I.0">local (typo3conf/ext/)</label>
+			<label index="tx_npsubversion_workingcopy.wc_extension_type.I.1">global (ext/)</label>
+			<label index="tx_npsubversion_workingcopy.wc_extension_type.I.2">system (sysext/)</label>
+			<label index="tx_npsubversion_workingcopy.wc_path">path to workingcopy/export (relative ../fileadmin/)</label>
+			<label index="tx_npsubversion_workingcopy.wc_no_backup">don't create backup by default (in exports)</label>
+		</languageKey>
+	</data>
+</T3locallang>

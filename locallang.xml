@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<T3locallang>
+	<data type="array">
+		<languageKey index="default" type="array">
+			<label index="cm1_update">SVN Update</label>
+			<label index="cm1_commit">SVN Commit...</label>
+			<label index="cm1_diff">SVN Diff</label>
+			<label index="cm1_delete">SVN Delete...</label>
+			<label index="cm1_revert">SVN Revert...</label>
+		</languageKey>
+	</data>
+</T3locallang>
