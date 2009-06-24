@@ -58,7 +58,7 @@ class tx_npsubversion_cm1 {
 	 */
 	public function main(&$backRef, $menuItems, $path, $uid) {
 			// page / tt_content -> return
-		if ($path === 'pages') {
+		if ($path === 'pages' || $uid > 0) {
 			return $menuItems;
 		}
 			// second level menu -> return
@@ -78,7 +78,7 @@ class tx_npsubversion_cm1 {
 			$fileStatus = $this->svn->getFileStatus($path);
 
 				// update
-			$url = t3lib_extMgm::extRelPath('np_subversion') . 'cm1/index.php?id=' . urlencode($path) . '&cmd=update';
+			$url = t3lib_extMgm::extRelPath('np_subversion') . 'cm1/index.php?path=' . urlencode($path) . '&cmd=update';
 			$localItems[] = $backRef->linkItem(
 				$GLOBALS['LANG']->getLLL('cm1_update',$LL),
 				$backRef->excludeIcon('<img src="' . t3lib_extMgm::extRelPath("np_subversion") . 'res/icons/update.gif" width="16" height="16" border="0" align="top" />'),
@@ -86,7 +86,7 @@ class tx_npsubversion_cm1 {
 				0
 			);
 				// commit
-			$url = t3lib_extMgm::extRelPath('np_subversion') . 'cm1/index.php?id=' . urlencode($path) . '&cmd=commit';
+			$url = t3lib_extMgm::extRelPath('np_subversion') . 'cm1/index.php?path=' . urlencode($path) . '&cmd=commit';
 			$localItems[] = $backRef->linkItem(
 				$GLOBALS['LANG']->getLLL('cm1_commit',$LL),
 				$backRef->excludeIcon('<img src="' . t3lib_extMgm::extRelPath("np_subversion") . 'res/icons/commit.gif" width="16" height="16" border="0" align="top" />'),
@@ -95,7 +95,7 @@ class tx_npsubversion_cm1 {
 			);
 				// diff
 			if (($fileStatus === 'modified' || $fileStatus === 'workingcopy') && is_file($path)) {
-				$url = t3lib_extMgm::extRelPath('np_subversion') . 'cm1/index.php?id=' . urlencode($path) . '&cmd=diff';
+				$url = t3lib_extMgm::extRelPath('np_subversion') . 'cm1/index.php?path=' . urlencode($path) . '&cmd=diff';
 				$localItems[] = $backRef->linkItem(
 					$GLOBALS['LANG']->getLLL('cm1_diff',$LL),
 					$backRef->excludeIcon('<img src="' . t3lib_extMgm::extRelPath("np_subversion") . 'res/icons/diff.gif" width="16" height="16" border="0" align="top" />'),
@@ -105,7 +105,7 @@ class tx_npsubversion_cm1 {
 			}
 				// revert
 			if ($fileStatus === 'modified' || $fileStatus === 'deleted') {
-				$url = t3lib_extMgm::extRelPath('np_subversion').'cm1/index.php?id=' . urlencode($path) . '&cmd=revert';
+				$url = t3lib_extMgm::extRelPath('np_subversion').'cm1/index.php?path=' . urlencode($path) . '&cmd=revert';
 				$localItems[] = $backRef->linkItem(
 					$GLOBALS['LANG']->getLLL('cm1_revert',$LL),
 					$backRef->excludeIcon('<img src="' . t3lib_extMgm::extRelPath("np_subversion") . 'res/icons/revert.gif" width="16" height="16" border="0" align="top" />'),
@@ -114,7 +114,7 @@ class tx_npsubversion_cm1 {
 				);
 			}
 				// delete
-			$url = t3lib_extMgm::extRelPath('np_subversion').'cm1/index.php?id=' . urlencode($path) . '&cmd=delete';
+			$url = t3lib_extMgm::extRelPath('np_subversion').'cm1/index.php?path=' . urlencode($path) . '&cmd=delete';
 			$localItems[] = $backRef->linkItem(
 				$GLOBALS['LANG']->getLLL('cm1_delete',$LL),
 				$backRef->excludeIcon('<img src="' . t3lib_extMgm::extRelPath("np_subversion") . 'res/icons/delete.gif" width="16" height="16" border="0" align="top" />'),

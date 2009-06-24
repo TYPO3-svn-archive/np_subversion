@@ -21,8 +21,8 @@ function scroll(obj) {
 		file1.scrollLeft = obj.scrollLeft;
 	}
 }
-function diff(path) {
-	var diffUrl = "index.php?id=" + path + "&cmd=diff";
+function diff(path, workingCopyUid) {
+	var diffUrl = "index.php?path=" + path + "&wc=" + workingCopyUid + "&cmd=diff";
 	var diffWindow = window.open(diffUrl, "diff", "width=770,height=700,resizable=yes");
 	diffWindow.focus();
 }

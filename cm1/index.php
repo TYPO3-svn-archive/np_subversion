@@ -142,25 +142,34 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 	 * This method is called from tx_nsubversion_cm1::init().
 	 * It tries to retrieve a working copy record from arguments wc/id:
 	 * if $_GET['wc'] (uid of the working copy record) is given respective, record will be loaded from the DB
-	 * if $_GET['id'] (absolute path coming from the filelist module) is given, first record matching will be loaded from DB (see tx_npsubversion_model::getByPath)
+	 * if $_GET['path'] (absolute path coming from the filelist module) is given, first record matching will be loaded from DB (see tx_npsubversion_model::getByPath)
 	 *
 	 * @return boolean TRUE if creation of $this->workingCopy succeeded, otherwise FALSE
 	 * @author Bastian Waidelich <waidelich@network-publishing.de>
 	 */
 	protected function initWorkingCopy() {
 			// working copy id given -> load working
-		if (t3lib_div::_GP('wc')) {
+		if (strlen(t3lib_div::_GP('wc')) > 0) {
 			$this->workingCopy = $this->model->getByUid(t3lib_div::_GP('wc'));
-			return $this->workingCopy !== FALSE;
+			if ($this->workingCopy === FALSE) {
+				return FALSE;
+			}
+			if (strlen(t3lib_div::_GP('path')) > 0 ) {
+				$path = urldecode(t3lib_div::_GP('path'));
+				$relativePath = tx_npsubversion_div::stripTrailingSlash(substr($path, strlen($this->workingCopy->getAbsolutePath())));
+				$this->workingCopy->setCurrentPath($path);
+				$this->workingCopy->selectFile($relativePath);
+			}
+			return TRUE;
 		}
 
 			// no working copy id, no path -> error
-		if (!t3lib_div::_GP('id')) {
+		if (strlen(t3lib_div::_GP('path')) === 0) {
 			return FALSE;
 		}
 
 			// local path
-		$path = urldecode(t3lib_div::_GP('id'));
+		$path = urldecode(t3lib_div::_GP('path'));
 		$relativePath = tx_npsubversion_div::stripTrailingSlash(substr($path, strlen(PATH_site . 'fileadmin/')));
 
 			// lookup working copy by path
@@ -482,7 +491,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 
 			if ($fileTextStatus === 'modified') {
 				$fileDiffIcon = '<img src="../res/icons/diff.gif" width="16" height="16" border="0" align="top" />';
-				$fileDiffIcon = '<a href="#" onclick="diff(\'' . urlencode($filePath) . '\'); return false">' . $fileDiffIcon . '</a>';
+				$fileDiffIcon = '<a href="#" onclick="diff(\'' . urlencode($filePath) . '\', ' . $this->workingCopy->getUid() . '); return false">' . $fileDiffIcon . '</a>';
 			} else {
 				$fileDiffIcon = '&nbsp;';
 			}
@@ -798,7 +807,8 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 
 		$content= tslib_cObj::getSubpart($this->templateCode, '###SUBPART_DIFF###');
 		$markerArray['###FILENAME###'] = basename($path);
-		$markerArray['###ID###'] = htmlspecialchars(urldecode(t3lib_div::_GP('id')));
+		$markerArray['###PATH###'] = htmlspecialchars(urldecode(t3lib_div::_GP('path')));
+		$markerArray['###WC###'] = $this->workingCopy->getUid();
 		$markerArray['###USERNAME###'] = htmlentities($this->modVars['username']);
 		$markerArray['###PASSWORD###'] = htmlentities($this->modVars['password']);
 		$markerArray['###REVISION_SELECTOR###'] = $this->revisionSelector($revisionInfos, $revision, TRUE);
@@ -999,7 +1009,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 
 			if ($fileTextStatus === 'modified') {
 				$fileDiffIcon = '<img src="../res/icons/diff.gif" width="16" height="16" border="0" align="top" />';
-				$fileDiffIcon = '<a href="#" onclick="diff(\'' . urlencode($filePath) . '\'); return false">' . $fileDiffIcon . '</a>';
+				$fileDiffIcon = '<a href="#" onclick="diff(\'' . urlencode($filePath) . '\', ' . $this->workingCopy->getUid() . '); return false">' . $fileDiffIcon . '</a>';
 			} else {
 				$fileDiffIcon = '&nbsp;';
 			}
@@ -1042,6 +1052,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 		$markerArray = array();
 		$markerArray['###LOCAL_PATH_LABEL###'] = $GLOBALS['LANG']->getLL('local_path') . ':';
 		$localPath = $this->workingCopy->getCurrentPath();
+
 		$relativeLocalPath = $this->truncatePath($localPath);
 		$markerArray['###LOCAL_PATH###'] = htmlspecialchars($relativeLocalPath);
 		$markerArray['###LOCAL_PATH_CROPPED###'] = htmlspecialchars(tx_npsubversion_div::cropFromCenter($relativeLocalPath, 80));
