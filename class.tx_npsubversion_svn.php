@@ -46,9 +46,16 @@ class tx_npsubversion_svn {
 	protected $svnConfigDir = '';
 
 	/**
-	 * @var string umask mode to be applied after write access 
+	 * @var string umask mode to be applied after write access
 	 */
 	protected $umask = '';
+
+	/**
+	 * @var boolean if TRUE, command executions will be done with passthru() instead of exec()
+	 * @see http://www.php.net/passthru
+	 * @see http://www.php.net/manual/en/function.exec.php
+	 */
+	protected $usePassthru = FALSE;
 
 	/**
 	 * @var array output of the last exec() call. One entry per line.
@@ -137,6 +144,29 @@ class tx_npsubversion_svn {
 	}
 
 	/**
+	 * Getter for the usePassthru field
+	 *
+	 * @return boolean
+	 * @author Bastian Waidelich <waidelich@network-publishing.de>
+	 */
+	public function getUsePassthru() {
+		return $this->usePassthru;
+	}
+
+	/**
+	 * If TRUE, command executions will be done with passthru() instead of exec()
+	 *
+	 * @param boolean
+	 * @return void
+	 * @author Bastian Waidelich <waidelich@network-publishing.de>
+	 * @see http://www.php.net/passthru
+	 * @see http://www.php.net/manual/en/function.exec.php
+	 */
+	public function setUsePassthru($value) {
+		$this->usePassthru = (boolean)$value;
+	}
+
+	/**
 	 * Returns response of the Subversion command line client as an Array, one entry per line
 	 *
 	 * @return array lines returned from svn client
@@ -200,7 +230,7 @@ class tx_npsubversion_svn {
 	public function exec($svnCommand, array $arguments, array $switches = array()) {
 		$this->output = array();
 		$this->status = null;
-		
+
 			// replace password before calling pre-exec hook
 		$password = NULL;
 		if (isset($switches['password'])) {
@@ -248,16 +278,24 @@ class tx_npsubversion_svn {
 			$oldumask = umask($this->umask);
 		}
 
-		// @todo: in some cases exec only returns one single line, we need one line per file.
-		// So we're creating a temp file with the output when on Windows. There must be a better way.
-		if (TYPO3_OS === 'WIN') {
-			$execTempFile = t3lib_div::tempnam('np_subversion');
-			$out = array();
-			exec($cmd . ' >' . $execTempFile.' 2>&1', $out, $this->status);
-			$this->output = file($execTempFile, FILE_IGNORE_NEW_LINES);
-			@unlink($execTempFile);
+		if ($this->usePassthru) {
+			ob_start();
+			passthru($cmd . ' 2>&1', $this->status);
+			$output = ob_get_contents();
+			ob_end_clean();
+			$this->output = explode(chr(10), $output);
 		} else {
-			exec($cmd . ' 2>&1', $this->output, $this->status);
+			// @todo: in some cases exec only returns one single line, we need one line per file.
+			// So we're creating a temp file with the output when on Windows. There must be a better way.
+			if (TYPO3_OS === 'WIN') {
+				$execTempFile = t3lib_div::tempnam('np_subversion');
+				$out = array();
+				exec($cmd . ' >' . $execTempFile . ' 2>&1', $out, $this->status);
+				$this->output = file($execTempFile, FILE_IGNORE_NEW_LINES);
+				@unlink($execTempFile);
+			} else {
+				exec($cmd . ' 2>&1', $this->output, $this->status);
+			}
 		}
 
 			// restore umask
@@ -425,13 +463,16 @@ class tx_npsubversion_svn {
 	 * The status of the Subversion command line call is valid even if authentication failed.
 	 * Thus we have to "parse" the output in order to find out whether authentication was successfull
 	 * @todo: check whether this approach works for translated versions of the command line client
-	 * 
+	 *
 	 * @return boolean TRUE if authentication failed, otherwise FALSE
 	 * @author Bastian Waidelich <waidelich@network-publishing.de>
 	 */
 	public function authenticationFailed() {
+		if ($this->status === 0) {
+			return FALSE;
+		}
 		$matches = array();
-		preg_match('/svn:.+authorization\sfailed/', $this->getOutputString(), $matches);
+		preg_match('/^(svn:|PROPFIND).+authorization\sfailed/m', $this->getOutputString(), $matches);
 		if (count($matches) > 0) {
 			return TRUE;
 		}

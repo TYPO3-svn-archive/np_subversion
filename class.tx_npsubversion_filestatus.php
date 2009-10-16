@@ -238,7 +238,11 @@ class tx_npsubversion_filestatus {
 		$filestatusArray = array();
 		foreach($svnStatusArray as $svnStatusLine) {
 			$filestatus = self::createFromSVNStatusLine($svnStatusLine);
-			$filestatusArray[$filestatus->getPath()] = $filestatus;
+			$filePath = $filestatus->getPath();
+			if (empty($filePath)) {
+				continue;
+			}
+			$filestatusArray[$filePath] = $filestatus;
 		}
 
 		return $filestatusArray;

@@ -26,6 +26,7 @@
 			<label index="error_log_message_file">Could not write temporary Log message file</label>
 			<label index="no_checkout_path">No checkout path</label>
 			<label index="no_export_target">"%s" is no export target</label>
+			<label index="no_working_copy">"%s" is no working copy</label>
 			<label index="error_creating_backup_folder">An error occured while creating backup folder</label>
 			<label index="error_renaming_target_folder">An error occured while renaming target folder</label>
 			<label index="error_renaming_tempt_folder">An error occured while renaming temporary target folder</label>

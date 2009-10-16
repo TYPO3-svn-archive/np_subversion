@@ -99,6 +99,9 @@ class tx_npsubversion_div {
 					return FALSE;
 				}
 			}else{
+				if (is_writable($file) === FALSE) {
+					chmod($file, 0600);
+				}
 				if (!unlink($file)) {
 					return FALSE;
 				}

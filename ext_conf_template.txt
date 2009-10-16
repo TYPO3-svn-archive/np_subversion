@@ -21,3 +21,6 @@ show_svn_dirs = 0
 
  #cat=others;type=string;label=Enable logging of svn commands:Enable logging for the specified svn commands (comma separated list). This requires a devlog extension to be installed and [SYS][enable_DLOG] to be set.
 log_svn_commands = commit,update,export
+
+ #cat=others;type=boolean;label=Use passthru() instead of exec():On some systems, exec() does not work as expected. Then you should try this setting.
+use_passthru = 0

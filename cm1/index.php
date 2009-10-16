@@ -86,7 +86,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 
 	/**
 	 * module HTML template
-	 * 
+	 *
 	 * @var string
 	 */
 	protected $templateCode;
@@ -109,7 +109,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 	 * Initialization method.
 	 * Will be called before anything else happens, sets up class fields.
 	 * Dies if no valid working copy was passed to the script (see initWorkingCopy())
-	 * 
+	 *
 	 * @return void
 	 * @author Bastian Waidelich <waidelich@network-publishing.de>
 	 */
@@ -120,6 +120,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 		$this->svn->setSvnPath($this->conf['svn_path']);
 		$this->svn->setSvnConfigDir($this->conf['svn_config_dir']);
 		$this->svn->setUmask($this->conf['umask']);
+		$this->svn->setUsePassthru($this->conf['use_passthru']);
 
 		$this->model = t3lib_div::makeInstance('tx_npsubversion_model');
 
@@ -182,7 +183,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 		$rootPath = $this->workingCopy->getAbsolutePath();
 		$relativePath = tx_npsubversion_div::stripTrailingSlash(substr($path, strlen($rootPath)));
 		$this->workingCopy->selectFile($relativePath);
-		
+
 		return TRUE;
 	}
 
@@ -259,7 +260,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 
 	/**
 	 * Ouputs the module content. Taken over from extension kickstarter.
-	 * 
+	 *
 	 * @return void
 	 * @author Bastian Waidelich <waidelich@network-publishing.de>
 	 */
@@ -316,7 +317,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 	 * When the commit-method is called it displays an intermediate view (commitPreview) to allow the user to review and adapt settings
 	 * only if preview is accepted ($_GET['ok'] is set) this method will continue and process the commit command:
 	 * Files that were marked for inclusion are collected and passed on to the SVN client. If a file is not yet versioned or marked for deletion, an additional SVN call is made to add/delete this file
-	 * 
+	 *
 	 * @return string preview/failure/summary view
 	 * @author Bastian Waidelich <waidelich@network-publishing.de>
 	 */
@@ -517,11 +518,14 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 
 	/**
 	 * Processes Subversion update command and outputs summary or authorization view if authentication failed
-	 * 
+	 *
 	 * @return string summary/authentication view
 	 * @author Bastian Waidelich <waidelich@network-publishing.de>
 	 */
 	protected function update() {
+		if (!t3lib_div::GPvar('ok')) {
+			return $this->updatePreview();
+		}
 		$markerArray = array();
 		$args = array($this->workingCopy->getCurrentPath());
 		$switches = array();
@@ -530,13 +534,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 		$this->svn->exec('update', $args, $switches);
 
 		if ($this->svn->authenticationFailed()) {
-			$content = tslib_cObj::getSubpart($this->templateCode, '###SUBPART_AUTHENTICATION_FAILED###');
-			$markerArray['###AUTHENTICATION###'] = $this->getAuthenticationSubpart();
-			$markerArray['###HIDDENFIELDS###'] = '
-				<input type="hidden" name="id" value="' . urlencode($this->workingCopy->getAbsolutePath()) . '" />
-				<input type="hidden" name="cmd" value="update" />';
-
-			return tslib_cObj::substituteMarkerArray($content, $markerArray);
+			return $this->updatePreview($GLOBALS['LANG']->getLL('authentication_failed'));
 		}
 
 		if ($this->modVars['auth_mode'] === 'explicit' && !empty($this->modVars['save_auth'])) {
@@ -552,33 +550,53 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 	}
 
 	/**
+	 * This method is called from update() to allow the user to authenticate
+	 *
+	 * @param string $errorMessage if not NULL, an error occured (e.g. authentication failed) and marker ###ERROR### will be substituted with $errorMessage
+	 * @return string update "preview" / error message
+	 * @author Bastian Waidelich <waidelich@network-publishing.de>
+	 */
+	protected function updatePreview($errorMessage = NULL) {
+		$template = tslib_cObj::getSubpart($this->templateCode, '###SUBPART_PRE_UPDATE###');
+		$markerArray = array();
+		$markerArray['###AUTHENTICATION###'] = $this->getAuthenticationSubpart();
+
+		if (!$this->svn->isWorkingCopy($this->workingCopy->getAbsolutePath())) {
+			return '<div class="errorbox">' . sprintf($GLOBALS['LANG']->getLL('no_working_copy'), $this->truncatePath($this->workingCopy->getAbsolutePath())) . '</div>';
+		}
+
+		if ($errorMessage != NULL) {
+			$markerArray['###ERROR###'] = '<div class="errorbox">' . $errorMessage . '</div>';
+		} else {
+			$markerArray['###ERROR###'] = '';
+		}
+
+		$markerArray['###HIDDENFIELDS###'] = '
+			<input type="hidden" name="wc" value="' . urlencode($this->workingCopy->getUid()) . '" />
+			<input type="hidden" name="cmd" value="update" />';
+
+		return tslib_cObj::substituteMarkerArray($template, $markerArray);
+	}
+
+	/**
 	 * Processes Subversion checkout command and outputs summary or authorization view if authentication failed
-	 * 
+	 *
 	 * @return string summary/authentication view
 	 * @author Bastian Waidelich <waidelich@network-publishing.de>
 	 */
 	protected function checkout() {
-		$markerArray = array();
-
-		$path = $this->workingCopy->getAbsolutePath();
-		if (strlen($path) === 0) {
-			return '<div class="errorbox">' . $GLOBALS['LANG']->getLL('no_checkout_path') . '</div>';
+		if (!t3lib_div::GPvar('ok')) {
+			return $this->checkoutPreview();
 		}
-
-		$args = array($this->workingCopy->getUrl(), $path);
+		$markerArray = array();
+		$args = array($this->workingCopy->getUrl(), $this->workingCopy->getAbsolutePath());
 		$switches = array();
 		$this->addAuthenticationSwitches($switches);
 
 		$this->svn->exec('checkout', $args, $switches);
 
 		if ($this->svn->authenticationFailed()) {
-			$content = tslib_cObj::getSubpart($this->templateCode, '###SUBPART_AUTHENTICATION_FAILED###');
-			$markerArray['###AUTHENTICATION###'] = $this->getAuthenticationSubpart();
-			$markerArray['###HIDDENFIELDS###'] = '
-				<input type="hidden" name="wc" value="' . urlencode($this->workingCopy->getUid()) . '" />
-				<input type="hidden" name="cmd" value="checkout" />';
-
-			return tslib_cObj::substituteMarkerArray($content, $markerArray);
+			return $this->checkoutPreview($GLOBALS['LANG']->getLL('authentication_failed'));
 		}
 		if ($this->modVars['auth_mode'] === 'explicit' && !empty($this->modVars['save_auth'])) {
 			$this->saveUsernameAndPasswordToCookie($this->modVars['username'], $this->modVars['password']);
@@ -594,10 +612,40 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 	}
 
 	/**
+	 * This method is called from checkout() to allow the user to authenticate
+	 *
+	 * @param string $errorMessage if not NULL, an error occured (e.g. authentication failed) and marker ###ERROR### will be substituted with $errorMessage
+	 * @return string checkout "preview" / error message
+	 * @author Bastian Waidelich <waidelich@network-publishing.de>
+	 */
+	protected function checkoutPreview($errorMessage = NULL) {
+		$template = tslib_cObj::getSubpart($this->templateCode, '###SUBPART_PRE_CHECKOUT###');
+		$markerArray = array();
+		$markerArray['###AUTHENTICATION###'] = $this->getAuthenticationSubpart();
+
+		$path = $this->workingCopy->getAbsolutePath();
+		if (strlen($path) === 0) {
+			return '<div class="errorbox">' . $GLOBALS['LANG']->getLL('no_checkout_path') . '</div>';
+		}
+
+		if ($errorMessage != NULL) {
+			$markerArray['###ERROR###'] = '<div class="errorbox">' . $errorMessage . '</div>';
+		} else {
+			$markerArray['###ERROR###'] = '';
+		}
+
+		$markerArray['###HIDDENFIELDS###'] = '
+			<input type="hidden" name="wc" value="' . urlencode($this->workingCopy->getUid()) . '" />
+			<input type="hidden" name="cmd" value="checkout" />';
+
+		return tslib_cObj::substituteMarkerArray($template, $markerArray);
+	}
+
+	/**
 	 * When the export-method is called it displays an intermediate view (exportPreview) to allow the user to review and adapt settings
 	 * only if preview is accepted ($_GET['ok'] is set) this method will continue and process the export command:
 	 * This exports all contents of the working copy to a temporary directory and renames the target folder only when export finishes successfully
-	 * 
+	 *
 	 * @return string preview/failure/summary view
 	 * @author Bastian Waidelich <waidelich@network-publishing.de>
 	 */
@@ -607,7 +655,20 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 		}
 		require_once(PATH_t3lib . 'class.t3lib_basicfilefunc.php');
 		$fileFunc = t3lib_div::makeInstance('t3lib_basicFileFunctions');
-		$tempPath = $fileFunc->getUniqueName('_tmp', $this->workingCopy->getAbsolutePath());
+		if (!$fileFunc->is_directory($this->workingCopy->getAbsolutePath())) {
+			$mkDirSuccess = t3lib_div::mkdir($this->workingCopy->getAbsolutePath());
+			if ($mkDirSuccess !== TRUE) {
+				return '<div class="errorbox">Could not create target target path at "' . $this->truncatePath($this->workingCopy->getAbsolutePath()) . '".</div>';
+			}
+		}
+		$tempPath = (string)$fileFunc->getUniqueName('_tmp', $this->workingCopy->getAbsolutePath());
+		if ($tempPath === '') {
+			return '<div class="errorbox">Target path "' . $this->truncatePath($this->workingCopy->getAbsolutePath()) . '" does not exist.</div>';
+		}
+		$mkDirSuccess = t3lib_div::mkdir($tempPath);
+		if ($mkDirSuccess !== TRUE) {
+			return '<div class="errorbox">Could not create temporary target path at "' . $this->truncatePath($tempPath) . '".</div>';
+		}
 
 		$args = array($this->workingCopy->getUrl(), $tempPath);
 		$switches = array('force' => TRUE);
@@ -642,7 +703,6 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 				return '<div class="errorbox">' . $GLOBALS['LANG']->getLL('error_renaming_target_folder') . '</div>';
 			}
 		}
-
 			// set file permissions
 		$this->setPermissions($this->svn->getAffectedPaths());
 
@@ -684,7 +744,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 		$markerArray['###AUTHENTICATION###'] = $this->getAuthenticationSubpart();
 
 		if ($this->svn->isWorkingCopy($this->workingCopy->getAbsolutePath())) {
-			return $this->exportPreview(sprintf($GLOBALS['LANG']->getLL('no_export_target'), $this->workingCopy->getAbsolutePath()));
+			return $this->exportPreview(sprintf($GLOBALS['LANG']->getLL('no_export_target'), $this->truncatePath($this->workingCopy->getAbsolutePath())));
 		}
 
 		if (file_exists($this->workingCopy->getAbsolutePath())) {
@@ -714,7 +774,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 
 	/**
 	 * Processes Subversion diff command and shows comparison- or authorization view if authentication failed
-	 * 
+	 *
 	 * @return string comparison/authentication view
 	 * @author Bastian Waidelich <waidelich@network-publishing.de>
 	 */
@@ -827,7 +887,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 	 * Processes Subversion delete command
 	 * When the delete-method is called it displays an intermediate view (deletePreview) to allow the user to confirm deletion.
 	 * only if preview is accepted ($_GET['ok'] is set) this method will continue and process the commit command
-	 * 
+	 *
 	 * @return string summary view
 	 * @author Bastian Waidelich <waidelich@network-publishing.de>
 	 * @author Martin Kutschker <Martin.Kutschker@blackbox.net>
@@ -904,7 +964,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 	 * Processes Subversion revert command
 	 * When the revert-method is called it displays an intermediate view (revertPreview) to allow the user to mark files for inclusion/exclusion.
 	 * only if preview is accepted ($_GET['ok'] is set) this method will continue and process the revert command
-	 * 
+	 *
 	 * @return string summary view
 	 * @author Bastian Waidelich <waidelich@network-publishing.de>
 	 * @author Martin Kutschker <Martin.Kutschker@blackbox.net>
@@ -1052,7 +1112,6 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 		$markerArray = array();
 		$markerArray['###LOCAL_PATH_LABEL###'] = $GLOBALS['LANG']->getLL('local_path') . ':';
 		$localPath = $this->workingCopy->getCurrentPath();
-
 		$relativeLocalPath = $this->truncatePath($localPath);
 		$markerArray['###LOCAL_PATH###'] = htmlspecialchars($relativeLocalPath);
 		$markerArray['###LOCAL_PATH_CROPPED###'] = htmlspecialchars(tx_npsubversion_div::cropFromCenter($relativeLocalPath, 80));
@@ -1379,7 +1438,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 
 	/**
 	 * sets create-mask and -group of specified directory according to the defaults of this TYPO3 installation
-	 * 
+	 *
 	 *
 	 * @param string $path absolute directory path
 	 * @return void
@@ -1394,18 +1453,12 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 
 	/**
 	 * Adds a junk of javascript to the page header causing the navigation frame to reload
-	 * 
+	 *
 	 * @return void
 	 * @author Bastian Waidelich <waidelich@network-publishing.de>
 	 */
 	protected function requestNavFrameReload() {
-		$this->doc->postCode .= '<script type="text/javascript">
-			/*<![CDATA[*/
-				if (top.content && top.content.nav_frame && top.content.nav_frame.refresh_nav)	{
-					top.content.nav_frame.refresh_nav();
-				}
-			/*]]>*/
-			</script>';
+		t3lib_BEfunc::setUpdateSignal('updateFolderTree');
 	}
 
 	/**
@@ -1547,10 +1600,13 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 			$username = $this->modVars['username'];
 			$password = $this->modVars['password'];
 
-			// if existent use credentials from repository record
-		} elseif ($this->modVars['auth_mode'] === 'implicit' && $this->workingCopy->hasCredentials()) {
-			$username = $this->workingCopy->getUsername();
-			$password = $this->workingCopy->getPassword();
+			// default authentication
+		} elseif ($this->modVars['auth_mode'] === 'implicit') {
+				// if existent use credentials from repository record
+			if ($this->workingCopy->hasCredentials()) {
+				$username = $this->workingCopy->getUsername();
+				$password = $this->workingCopy->getPassword();
+			}
 
 			// otherwise try to get credentials from cookie
 		} else {
@@ -1559,8 +1615,8 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 		}
 
 		if (!empty($username)) {
-			$switches['username'] = htmlspecialchars($username);
-			$switches['password'] = htmlspecialchars($password);
+			$switches['username'] = $username;
+			$switches['password'] = $password;
 		}
 	}
 }

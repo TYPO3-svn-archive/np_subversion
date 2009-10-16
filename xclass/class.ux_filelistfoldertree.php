@@ -70,6 +70,8 @@ class ux_filelistFolderTree extends filelistFolderTree {
 		$this->svn = t3lib_div::makeInstance('tx_npsubversion_svn');
 		$this->svn->setSvnPath($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['np_subversion']['svn_path']);
 		$this->svn->setSvnConfigDir($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['np_subversion']['svn_config_dir']);
+		$this->svn->setUmask($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['np_subversion']['umask']);
+		$this->svn->setUsePassthru($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['np_subversion']['use_passthru']);
 
 		$this->model = t3lib_div::makeInstance('tx_npsubversion_model');
 		$this->workingCopies = $this->model->getWorkingCopies();
