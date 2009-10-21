@@ -72,6 +72,7 @@ class ux_filelistFolderTree extends filelistFolderTree {
 		$this->svn->setSvnConfigDir($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['np_subversion']['svn_config_dir']);
 		$this->svn->setUmask($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['np_subversion']['umask']);
 		$this->svn->setUsePassthru($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['np_subversion']['use_passthru']);
+		$this->svn->setCommandSuffix($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['np_subversion']['command_suffix']);
 
 		$this->model = t3lib_div::makeInstance('tx_npsubversion_model');
 		$this->workingCopies = $this->model->getWorkingCopies();
@@ -154,13 +155,13 @@ class ux_filelistFolderTree extends filelistFolderTree {
 	 * @see filelistFolderTree::getFolderTree()
 	 * @author Bastian Waidelich <waidelich@network-publishing.de>
 	 */
-	public function getFolderTree($files_path, $depth = 999) {
+	public function getFolderTree($files_path, $depth=999, $type='') {
 
 			// This generates the directory tree
 		$dirs = t3lib_div::get_dirs($files_path);
 		if (!is_array($dirs)) return 0;
 
-		// <np_subversion>
+// <np_subversion> remove ".svn" directories
 		if (!$GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['np_subversion']['show_svn_dirs']) {
 			foreach($dirs as $key => $val)	{
 				if ($val === '.svn') {
@@ -168,7 +169,7 @@ class ux_filelistFolderTree extends filelistFolderTree {
 				}
 			}
 		}
-		// </np_subversion>
+// </np_subversion>
 
 		sort($dirs);
 		$c = count($dirs);
@@ -183,7 +184,7 @@ class ux_filelistFolderTree extends filelistFolderTree {
 			end($this->tree);
 			$treeKey = key($this->tree);	// Get the key for this space
 
-			$val = ereg_replace('^\./','',$val);
+			$val = preg_replace('/^\.\//','',$val);
 			$title = $val;
 			$path = $files_path.$val.'/';
 
@@ -200,7 +201,8 @@ class ux_filelistFolderTree extends filelistFolderTree {
 				$nextCount = $this->getFolderTree(
 					$path,
 					$depth-1,
-					$this->makeHTML ? '<img'.t3lib_iconWorks::skinImg($this->backPath,'gfx/ol/'.($a == $c ? 'blank' : 'line').'.gif','width="18" height="16"').' alt="" />' : ''
+					$this->makeHTML ? '<img'.t3lib_iconWorks::skinImg($this->backPath,'gfx/ol/'.($a == $c ? 'blank' : 'line').'.gif','width="18" height="16"').' alt="" />' : '',
+					$type
 				);
 				$exp = 1;	// Set "did expand" flag
 			} else {
@@ -212,16 +214,33 @@ class ux_filelistFolderTree extends filelistFolderTree {
 			if ($this->makeHTML)	{
 				$HTML = $this->PMicon($row,$a,$c,$nextCount,$exp);
 
-				$icon = 'gfx/i/_icon_'.t3lib_BEfunc::getPathType_web_nonweb($path).'folders.gif';
+				$webpath = t3lib_BEfunc::getPathType_web_nonweb($path);
+				$icon = 'gfx/i/_icon_' .$webpath . 'folders' . ($type == 'readonly' ? '_ro' : '') . '.gif';
 				if ($val == '_temp_')	{
 					$icon = 'gfx/i/sysf.gif';
-					$row['title']='TEMP';
-					$row['_title']='<b>TEMP</b>';
+
+// <np_subversion> TYPO3 < 4.3 compatibility
+					$tempLabel = $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_mod_file_list.xml:temp', true);
+					if (strlen($tempLabel) === 0) {
+						$tempLabel = 'TEMP';
+					}
+					$row['title'] = $tempLabel;
+					$row['_title'] = '<strong>' . $tempLabel . '</strong>';
+// </np_subversion>
+
 				}
 				if ($val == '_recycler_')	{
 					$icon = 'gfx/i/recycler.gif';
-					$row['title']='RECYCLER';
-					$row['_title']='<b>RECYCLER</b>';
+
+// <np_subversion> TYPO3 < 4.3 compatibility
+					$recyclerLabel = $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_mod_file_list.xml:recycler', true);
+					if (strlen($recyclerLabel) === 0) {
+						$recyclerLabel = 'RECYCLER';
+					}
+					$row['title'] = $recyclerLabel;
+					$row['_title'] = '<strong>' . $recyclerLabel . '</strong>';
+// </np_subversion>
+
 				}
 				$HTML .= $this->wrapIcon('<img'.t3lib_iconWorks::skinImg($this->backPath, $icon, 'width="18" height="16"').' alt="" />',$row);
 			}
@@ -232,13 +251,13 @@ class ux_filelistFolderTree extends filelistFolderTree {
 				'HTML'   => $HTML,
 				'hasSub' => $nextCount && $this->expandNext($specUID),
 				'isFirst'=> ($a == 1),
-				'isLast' => FALSE,
+				'isLast' => false,
 				'invertedDepth'=> $depth,
 				'bank'   => $this->bank
 			);
 		}
 
-		if($a) { $this->tree[$treeKey]['isLast'] = TRUE; }
+		if($a) { $this->tree[$treeKey]['isLast'] = true; }
 		return $c;
 	}
 

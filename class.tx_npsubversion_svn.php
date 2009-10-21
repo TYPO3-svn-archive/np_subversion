@@ -58,6 +58,11 @@ class tx_npsubversion_svn {
 	protected $usePassthru = FALSE;
 
 	/**
+	 * @var string suffix that will be appended to all commands before execution
+	 */
+	protected $commandSuffix = '2>&1';
+
+	/**
 	 * @var array output of the last exec() call. One entry per line.
 	 */
 	protected $output = array();
@@ -154,9 +159,9 @@ class tx_npsubversion_svn {
 	}
 
 	/**
-	 * If TRUE, command executions will be done with passthru() instead of exec()
+	 * Setter for the usePassthru field
 	 *
-	 * @param boolean
+	 * @param boolean $value If TRUE, command executions will be done with passthru() instead of exec()
 	 * @return void
 	 * @author Bastian Waidelich <waidelich@network-publishing.de>
 	 * @see http://www.php.net/passthru
@@ -164,6 +169,27 @@ class tx_npsubversion_svn {
 	 */
 	public function setUsePassthru($value) {
 		$this->usePassthru = (boolean)$value;
+	}
+
+	/**
+	 * Getter for the commandSuffix field
+	 *
+	 * @return string
+	 * @author Bastian Waidelich <waidelich@network-publishing.de>
+	 */
+	public function getCommandSuffix() {
+		return $this->commandSuffix;
+	}
+
+	/**
+	 * Setter for the commandSuffix field
+	 *
+	 * @param string $value suffix that will be appended to all commands before execution
+	 * @return void
+	 * @author Bastian Waidelich <waidelich@network-publishing.de>
+	 */
+	public function setCommandSuffix($value) {
+		$this->commandSuffix = $value;
 	}
 
 	/**
@@ -268,7 +294,7 @@ class tx_npsubversion_svn {
 			}
 		}
 
-		$cmd = $this->svnPath . ' ' . $svnCommand . ' ' . $_switches;
+		$cmd = '"' . $this->svnPath . '" ' . $svnCommand . ' ' . $_switches;
 		foreach($arguments as $argument) {
 			$cmd .= ' ' . escapeshellarg($argument);
 		}
@@ -277,10 +303,13 @@ class tx_npsubversion_svn {
 		if (strlen($this->umask) > 0) {
 			$oldumask = umask($this->umask);
 		}
+		if (strlen($this->commandSuffix) > 0) {
+			$cmd .= ' ' . $this->commandSuffix;
+		}
 
 		if ($this->usePassthru) {
 			ob_start();
-			passthru($cmd . ' 2>&1', $this->status);
+			passthru($cmd, $this->status);
 			$output = ob_get_contents();
 			ob_end_clean();
 			$this->output = explode(chr(10), $output);
@@ -289,12 +318,13 @@ class tx_npsubversion_svn {
 			// So we're creating a temp file with the output when on Windows. There must be a better way.
 			if (TYPO3_OS === 'WIN') {
 				$execTempFile = t3lib_div::tempnam('np_subversion');
+				$cmd .= ' > ' . $execTempFile;
 				$out = array();
-				exec($cmd . ' >' . $execTempFile . ' 2>&1', $out, $this->status);
+				exec($cmd, $out, $this->status);
 				$this->output = file($execTempFile, FILE_IGNORE_NEW_LINES);
 				@unlink($execTempFile);
 			} else {
-				exec($cmd . ' 2>&1', $this->output, $this->status);
+				exec($cmd, $this->output, $this->status);
 			}
 		}
 

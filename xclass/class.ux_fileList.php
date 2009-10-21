@@ -51,6 +51,7 @@ class ux_fileList extends fileList {
 		$this->svn->setSvnConfigDir($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['np_subversion']['svn_config_dir']);
 		$this->svn->setUmask($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['np_subversion']['umask']);
 		$this->svn->setUsePassthru($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['np_subversion']['use_passthru']);
+		$this->svn->setCommandSuffix($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['np_subversion']['command_suffix']);
 	}
 
 	/**

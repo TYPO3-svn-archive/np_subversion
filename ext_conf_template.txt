@@ -24,3 +24,6 @@ log_svn_commands = commit,update,export
 
  #cat=others;type=boolean;label=Use passthru() instead of exec():On some systems, exec() does not work as expected. Then you should try this setting.
 use_passthru = 0
+
+ #cat=others;type=string;label=Command suffix:Use "2>&1" to forward STDERR and STDOUT to the output stream - In some environments this does not work as expected. In this case try to remove the command suffix.
+command_suffix = 2>&1

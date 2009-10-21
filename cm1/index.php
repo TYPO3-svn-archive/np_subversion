@@ -121,6 +121,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 		$this->svn->setSvnConfigDir($this->conf['svn_config_dir']);
 		$this->svn->setUmask($this->conf['umask']);
 		$this->svn->setUsePassthru($this->conf['use_passthru']);
+		$this->svn->setCommandSuffix($this->conf['command_suffix']);
 
 		$this->model = t3lib_div::makeInstance('tx_npsubversion_model');
 
@@ -331,7 +332,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 
 		$filestatusArray = $this->svn->getFileStatusArray($this->workingCopy->getAbsolutePath());
 		if ($filestatusArray === FALSE) {
-			return $this->commitPreview('Subversion error: ' . $this->svn->getOutputHTML());
+			return $this->commitPreview($GLOBALS['LANG']->getLL('subversion_error') . ': ' . $this->svn->getOutputHTML());
 		}
 
 		$addFiles = array();
@@ -391,7 +392,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 		}
 
 		if ($this->svn->getStatus() !== 0) {
-			return $this->commitPreview('Subversion error: ' . $this->svn->getOutputHTML());
+			return $this->commitPreview($GLOBALS['LANG']->getLL('subversion_error') . ': ' . $this->svn->getOutputHTML());
 		}
 
 		$this->saveLogMessageToHistory($this->modVars['message']);
@@ -453,7 +454,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 
 		$filestatusArray = $this->svn->getFileStatusArray($this->workingCopy->getCurrentPath());
 		if ($filestatusArray === FALSE) {
-			return '<div class="errorbox">Subversion error: ' . $this->svn->getOutputHTML() . '</div>';
+			return '<div class="errorbox">' . $GLOBALS['LANG']->getLL('subversion_error') . ': '  . $this->svn->getOutputHTML() . '</div>';
 		}
 
 		if (count($filestatusArray) === 0) {
@@ -540,6 +541,9 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 		if ($this->modVars['auth_mode'] === 'explicit' && !empty($this->modVars['save_auth'])) {
 			$this->saveUsernameAndPasswordToCookie($this->modVars['username'], $this->modVars['password']);
 		}
+		if (count($this->svn->getOutput()) === 0) {
+			return $this->updatePreview('<a href="#" onclick="top.goToModule(\'tools_em\', 0, \'CMD[showExt]=np_subversion&SET[singleDetails]=info\');this.blur();return false;">' . $GLOBALS['LANG']->getLL('no_output') . '</a>');
+		}
 
 		$this->setPermissions($this->svn->getAffectedPaths());
 
@@ -601,7 +605,9 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 		if ($this->modVars['auth_mode'] === 'explicit' && !empty($this->modVars['save_auth'])) {
 			$this->saveUsernameAndPasswordToCookie($this->modVars['username'], $this->modVars['password']);
 		}
-
+		if (count($this->svn->getOutput()) === 0) {
+			return $this->checkoutPreview('<a href="#" onclick="top.goToModule(\'tools_em\', 0, \'CMD[showExt]=np_subversion&SET[singleDetails]=info\');this.blur();return false;">' . $GLOBALS['LANG']->getLL('no_output') . '</a>');
+		}
 			// set file permissions and reload navigation frame
 		$this->setPermissions($this->svn->getAffectedPaths());
 
@@ -663,11 +669,11 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 		}
 		$tempPath = (string)$fileFunc->getUniqueName('_tmp', $this->workingCopy->getAbsolutePath());
 		if ($tempPath === '') {
-			return '<div class="errorbox">Target path "' . $this->truncatePath($this->workingCopy->getAbsolutePath()) . '" does not exist.</div>';
+			return '<div class="errorbox">' . sprintf($GLOBALS['LANG']->getLL('target_path_does_not_exist'), $this->truncatePath($this->workingCopy->getAbsolutePath())) . '</div>';
 		}
 		$mkDirSuccess = t3lib_div::mkdir($tempPath);
 		if ($mkDirSuccess !== TRUE) {
-			return '<div class="errorbox">Could not create temporary target path at "' . $this->truncatePath($tempPath) . '".</div>';
+			return '<div class="errorbox">' . sprintf($GLOBALS['LANG']->getLL('error_creating_temp_folder'), $this->truncatePath($tempPath)) . '</div>';
 		}
 
 		$args = array($this->workingCopy->getUrl(), $tempPath);
@@ -682,12 +688,16 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 
 			// SVN error occured -> go back to preview
 		if ($this->svn->getStatus() !== 0) {
-			return $this->exportPreview('Subversion error: ' . $this->svn->getOutputHTML());
+			return $this->exportPreview($GLOBALS['LANG']->getLL('subversion_error') . ': ' . $this->svn->getOutputHTML());
+		}
+
+		if (count($this->svn->getOutput()) === 0) {
+			return $this->exportPreview('<a href="#" onclick="top.goToModule(\'tools_em\', 0, \'CMD[showExt]=np_subversion&SET[singleDetails]=info\');this.blur();return false;">' . $GLOBALS['LANG']->getLL('no_output') . '</a>');
 		}
 
 			// no affected files -> go back to preview
 		if (count($this->svn->getAffectedPaths()) === 0) {
-			return $this->exportPreview('Subversion error: ' . $this->svn->getOutputHTML());
+			return $this->exportPreview($GLOBALS['LANG']->getLL('subversion_error') . ': ' . $this->svn->getOutputHTML());
 		}
 
 			// displays error message if target directory doesn't exist or backup could not be created
@@ -908,7 +918,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 
 		$this->svn->exec('delete', $args, $switches);
 		if ($this->svn->getStatus() !== 0) {
-			return $this->deletePreview('Subversion error: ' . $this->svn->getOutputHTML());
+			return $this->deletePreview($GLOBALS['LANG']->getLL('subversion_error') . ': ' . $this->svn->getOutputHTML());
 		}
 
 		$this->requestNavFrameReload();
@@ -937,11 +947,11 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 		}
 
 		if (!file_exists($path)) {
-			return '<div class="errorbox">Subversion error: the file &quot;' . htmlspecialchars($path) . '&quot; does not exist!</div>';
+			return '<div class="errorbox">' . sprintf($GLOBALS['LANG']->getLL('file_does_not_exist'), htmlspecialchars($path)) . '</div>';
 		}
 		$filestatusArray = $this->svn->getFileStatusArray($path);
 		if ($filestatusArray === FALSE) {
-			return '<div class="errorbox">Subversion error: ' . $this->svn->getOutputHTML() . '</div>';
+			return '<div class="errorbox">' . $GLOBALS['LANG']->getLL('subversion_error') . ': ' . $this->svn->getOutputHTML() . '</div>';
 		}
 		$markerArray['###FILE_TYPE###'] = is_dir($path) ? 'directory' : 'file';
 		$markerArray['###MODIFICATIONS###'] = count($filestatusArray) > 0 ? $GLOBALS['LANG']->getLL('note') . ': ' . $GLOBALS['LANG']->getLL('contains_local_modifications') : '';
@@ -979,7 +989,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 
 		$filestatusArray = $this->svn->getFileStatusArray($this->workingCopy->getAbsolutePath());
 		if ($filestatusArray === FALSE) {
-			return $this->revertPreview('Subversion error: ' . $this->svn->getOutputHTML());
+			return $this->revertPreview($GLOBALS['LANG']->getLL('subversion_error') . ': ' . $this->svn->getOutputHTML());
 		}
 
 		$revertFiles = array();
@@ -995,7 +1005,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 		$this->svn->exec('revert', $revertFiles);
 
 		if ($this->svn->getStatus() !== 0) {
-			return $this->revertPreview('Subversion error: ' . $this->svn->getOutputHTML());
+			return $this->revertPreview($GLOBALS['LANG']->getLL('subversion_error') . ': ' . $this->svn->getOutputHTML());
 		}
 
 		$content = tslib_cObj::getSubpart($this->templateCode, '###SUBPART_POST_REVERT###');
@@ -1032,7 +1042,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 
 		$filestatusArray = $this->svn->getFileStatusArray($this->workingCopy->getCurrentPath());
 		if ($filestatusArray === FALSE) {
-			return '<div class="errorbox">Subversion error: ' . $this->svn->getOutputHTML() . '</div>';
+			return '<div class="errorbox">' . $GLOBALS['LANG']->getLL('subversion_error') . ': ' . $this->svn->getOutputHTML() . '</div>';
 		}
 		if (count($filestatusArray) === 0) {
 			return '<div class="infobox">' . $GLOBALS['LANG']->getLL('no_files_changed') . '</div>';
