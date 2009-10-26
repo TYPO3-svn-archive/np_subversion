@@ -498,9 +498,6 @@ class tx_npsubversion_svn {
 	 * @author Bastian Waidelich <waidelich@network-publishing.de>
 	 */
 	public function authenticationFailed() {
-		if ($this->status === 0) {
-			return FALSE;
-		}
 		$matches = array();
 		preg_match('/^(svn:|PROPFIND).+authorization\sfailed/m', $this->getOutputString(), $matches);
 		if (count($matches) > 0) {
