@@ -96,6 +96,14 @@ class tx_npsubversion_cm1 {
 				$backRef->urlRefForCM($url),
 				0
 			);
+				// log
+			$url = t3lib_extMgm::extRelPath('np_subversion') . 'cm1/index.php?path=' . urlencode($path) . '&cmd=log';
+			$localItems[] = $backRef->linkItem(
+				$GLOBALS['LANG']->getLLL('cm1_log',$LL),
+				$backRef->excludeIcon('<img src="' . t3lib_extMgm::extRelPath("np_subversion") . 'res/icons/log.gif" width="16" height="16" border="0" align="top" />'),
+				$backRef->urlRefForCM($url),
+				0
+			);
 				// diff
 			if (($fileStatus === 'modified' || $fileStatus === 'workingcopy') && is_file($path)) {
 				$url = t3lib_extMgm::extRelPath('np_subversion') . 'cm1/index.php?path=' . urlencode($path) . '&cmd=diff';

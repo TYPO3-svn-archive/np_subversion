@@ -420,3 +420,73 @@
 		</table>
 	</div>
 <!-- ###SUBPART_POST_REVERT### end -->
+
+<!-- ###SUBPART_PRE_LOG### begin -->
+	<div id="log">
+		###ERROR###
+		<br />
+		###AUTHENTICATION###
+		<div class="buttons">
+			<input type="submit" name="reload" value=" - AUTHENTICATE - " />
+		</div>
+		<br />
+		<fieldset class="revisions">
+			<legend>Select revision</legend>
+			<dl>
+				<dt>
+					<label for="revision_from">From revision:</label>
+				</dt>
+				<dd>
+					###REVISION_SELECTOR_FROM###
+				</dd>
+				<dt>
+					<label for="revision_to">To revision:</label>
+				</dt>
+				<dd>
+					###REVISION_SELECTOR_TO###
+				</dd>
+			</dl>
+		</fieldset>
+		###HIDDENFIELDS###
+		<div class="buttons">
+			<input type="submit" name="ok" value=" - OK - " />
+		</div>
+	</div>
+<!-- ###SUBPART_PRE_LOG### end -->
+
+<!-- ###SUBPART_POST_LOG### begin -->
+	<div id="log">
+		<table>
+			<tr>
+				<th>
+					Revision
+				</th>
+				<th>
+					Author
+				</th>
+				<th>
+					Date
+				</th>
+				<th>
+					Message
+				</th>
+			</tr>
+			<!-- ###SUBPART_ROW### begin -->
+				<tr>
+					<td>
+						###REVISION###
+					</td>
+					<td>
+						###AUTHOR###
+					</td>
+					<td>
+						###DATE###
+					</td>
+					<td>
+						###MESSAGE###
+					</td>
+				</tr>
+			<!-- ###SUBPART_ROW### end -->
+		</table>
+	</div>
+<!-- ###SUBPART_POST_LOG### end -->

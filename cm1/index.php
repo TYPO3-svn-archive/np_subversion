@@ -305,6 +305,10 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 				$header = 'REVERT';
 				$content = $this->revert();
 				break;
+			case 'log':
+				$header = 'LOG';
+				$content = $this->log();
+				break;
 			default:
 				$header = 'COMMAND NOT ALLOWED';
 				$content = '<em>the command "' . htmlspecialchars($this->cmd) . '" is not implemented</em>';
@@ -1112,6 +1116,95 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 	}
 
 	/**
+	 * Show log of the current working copy
+	 *
+	 * @return string summary/authentication view
+	 * @author Bastian Waidelich <waidelich@network-publishing.de>
+	 */
+	protected function log() {
+		if (!t3lib_div::GPvar('ok')) {
+			return $this->logPreview();
+		}
+		$markerArray = array();
+		$args = array($this->workingCopy->getCurrentPath());
+		$revisionRange = (integer)t3lib_div::GPvar('revision_from') . ':' . (integer)t3lib_div::GPvar('revision_to');
+		$switches = array('xml' => TRUE, 'revision' => $revisionRange);
+		$this->addAuthenticationSwitches($switches);
+
+		$this->svn->exec('log', $args, $switches);
+
+		if ($this->svn->authenticationFailed()) {
+			return $this->logPreview($GLOBALS['LANG']->getLL('authentication_failed'));
+		}
+
+		if ($this->modVars['auth_mode'] === 'explicit' && !empty($this->modVars['save_auth'])) {
+			$this->saveUsernameAndPasswordToCookie($this->modVars['username'], $this->modVars['password']);
+		}
+		if (count($this->svn->getOutput()) === 0) {
+			return $this->logPreview('<a href="#" onclick="top.goToModule(\'tools_em\', 0, \'CMD[showExt]=np_subversion&SET[singleDetails]=info\');this.blur();return false;">' . $GLOBALS['LANG']->getLL('no_output') . '</a>');
+		}
+
+		$logXml = simplexml_load_string($this->svn->getOutputString(), 'SimpleXMLElement', LIBXML_NOERROR);
+		if ($logXml === FALSE) {
+			return $this->logPreview('Could not parse XML');
+		}
+
+		$content = tslib_cObj::getSubpart($this->templateCode, '###SUBPART_POST_LOG###');
+		$logRowTemplate = tslib_cObj::getSubpart($content, '###SUBPART_ROW###');
+
+		$rows = '';
+		if (isset($logXml->logentry) && count($logXml->logentry) > 0) {
+			foreach($logXml->logentry as $logEntry) {
+				$rowMarkerArray['###REVISION###'] = (integer)$logEntry->attributes()->revision;
+				$rowMarkerArray['###AUTHOR###'] = htmlspecialchars((string)$logEntry->author);
+				$date = new DateTime((string)$logEntry->date);
+				$date->setTimezone(new DateTimeZone(date_default_timezone_get()));
+				$rowMarkerArray['###DATE###'] = $date->format('d.m.Y H:i:s');
+				$rowMarkerArray['###MESSAGE###'] = nl2br(htmlspecialchars((string)$logEntry->msg));
+				$rows .= tslib_cObj::substituteMarkerArray($logRowTemplate, $rowMarkerArray);
+			}
+		}
+		$content = tslib_cObj::substituteSubpart($content, 'SUBPART_ROW', $rows);
+
+		$markerArray['###ROWS###'] = $rows;
+		return tslib_cObj::substituteMarkerArray($content, $markerArray);
+	}
+
+	/**
+	 * This method is called from log() to allow interaction and to display error messages
+	 *
+	 * @param string $errorMessage if not null, an error occured (e.g. authentication failed) and marker ###ERROR### will be substituted with $errorMessage
+	 * @return string log "preview" / error message
+	 * @author Bastian Waidelich <waidelich@network-publishing.de>
+	 */
+	protected function logPreview($errorMessage = NULL) {
+		$template = tslib_cObj::getSubpart($this->templateCode, '###SUBPART_PRE_LOG###');
+		$markerArray = array();
+		$markerArray['###AUTHENTICATION###'] = $this->getAuthenticationSubpart();
+
+		if (!$this->svn->isWorkingCopy($this->workingCopy->getAbsolutePath())) {
+			return '<div class="errorbox">' . sprintf($GLOBALS['LANG']->getLL('no_working_copy'), $this->truncatePath($this->workingCopy->getAbsolutePath())) . '</div>';
+		}
+
+		if ($errorMessage != NULL) {
+			$markerArray['###ERROR###'] = '<div class="errorbox">' . $errorMessage . '</div>';
+		} else {
+			$markerArray['###ERROR###'] = '';
+		}
+
+		$revisionInfos = (array)$this->getRevisions($this->workingCopy->getAbsolutePath());
+		$fromRevision = (integer)array_pop(array_keys($revisionInfos));
+		$markerArray['###REVISION_SELECTOR_FROM###'] = $this->revisionSelector($revisionInfos, $fromRevision, FALSE, 'revision_from');
+		$markerArray['###REVISION_SELECTOR_TO###'] = $this->revisionSelector($revisionInfos, 'HEAD', FALSE, 'revision_to');
+
+		$markerArray['###HIDDENFIELDS###'] = '
+			<input type="hidden" name="wc" value="' . urlencode($this->workingCopy->getUid()) . '" />
+			<input type="hidden" name="cmd" value="log" />';
+
+		return tslib_cObj::substituteMarkerArray($template, $markerArray);
+	}
+
+	/**
 	 * substitutes markers in the header subpart of the template (local path, working copy infos,...)
 	 *
 	 * @return string substituted header subpart
@@ -1566,15 +1659,16 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 	 * @param array $revisionInfos an array with revisions as keys and author names as values
 	 * @param integer $currentRevision the current revision to be selected
 	 * @param boolean $submitOnChange if TRUE, the form will be submitted as soon as the revision is changed
+	 * @param string $fieldName name of the selector
 	 * @return string the revision selector html code
 	 * @author Bastian Waidelich <waidelich@network-publishing.de>
 	 */
-	protected function revisionSelector($revisionInfos, $currentRevision, $submitOnChange = FALSE) {
+	protected function revisionSelector($revisionInfos, $currentRevision, $submitOnChange = FALSE, $fieldName = 'revision') {
 		$onChange = '';
 		if ($submitOnChange) {
 			$onChange = 'onchange="form.submit()"';
 		}
-		$code = '<select name="revision"' . $onChange . '>' . chr(10);
+		$code = '<select id="' . htmlspecialchars($fieldName) . '" name="' . htmlspecialchars($fieldName) . '"' . $onChange . '>' . chr(10);
 
 		$firstEntry = TRUE;
 		foreach($revisionInfos as $revision => $author) {
