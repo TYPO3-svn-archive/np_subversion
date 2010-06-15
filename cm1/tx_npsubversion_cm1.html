@@ -75,6 +75,7 @@
 			<script type="text/javascript">toggleMasterCheckbox('select_all', 'files');</script>
 		</fieldset>
 		<br />
+		###INCREASE_VERSION###
 		###AUTHENTICATION###
 		###HIDDENFIELDS###
 		<div class="buttons">
@@ -194,6 +195,29 @@
 		</td>
 	</tr>
 <!-- ###SUBPART_MESSAGE_ROW### end -->
+
+<!-- ###SUBPART_INCREASE_VERSION### begin -->
+	<fieldset>
+		<legend>###HEADER###</legend>
+		<input type="radio" name="modVars[increase_version]" id="increaseVersion_skip" value=""###INCREASE_VERSION_SKIP_CHECKED### />
+		<label for="increaseVersion_skip">###INCREASE_VERSION_SKIP_LABEL###</label><br />
+		<input type="radio" name="modVars[increase_version]" id="increaseVersion_dev" value="dev"###INCREASE_VERSION_DEV_CHECKED### />
+		<label for="increaseVersion_dev">###INCREASE_VERSION_DEV_LABEL###</label><br />
+		<input type="radio" name="modVars[increase_version]" id="increaseVersion_sub" value="sub" />
+		<label for="increaseVersion_sub">###INCREASE_VERSION_SUB_LABEL###</label><br />
+		<input type="radio" name="modVars[increase_version]" id="increaseVersion_main" value="main" />
+		<label for="increaseVersion_main">###INCREASE_VERSION_MAIN_LABEL###</label><br />
+	</fieldset>
+	<br />
+<!-- ###SUBPART_INCREASE_VERSION### end -->
+
+<!-- ###SUBPART_INCREASE_VERSION_EXTENSION_NOT_LOADED### begin -->
+	<fieldset>
+		<legend>###HEADER_EXTENSION_NOT_LOADED_LABEL###</legend>
+		<p class="typo3-red">###EXTENSION_NOT_LOADED_LABEL###</p>
+	</fieldset>
+	<br />
+<!-- ###SUBPART_INCREASE_VERSION_EXTENSION_NOT_LOADED### end -->
 
 <!-- ###SUBPART_AUTHENTICATION_FAILED### begin -->
 	<div id="update">

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <T3locallang>
 	<data type="array">
 		<languageKey index="default" type="array">
@@ -15,6 +15,13 @@
 			<label index="file_does_not_exist">The file "%s" does not exist</label>
 			<label index="target_path_does_not_exist">The target path "%s" does not exist</label>
 			<label index="target_path_does_not_exist">The target path "%s" does not exist</label>
+			<label index="increase_version_header">Update extension version</label>
+			<label index="increase_version_skip">Don't change version (%s)</label>
+			<label index="increase_version_dev">New bugfix version (latest x.x.&lt;strong&gt;&lt;span class="typo3-red"&gt;x+1&lt;/span&gt;&lt;/strong&gt;)</label>
+			<label index="increase_version_sub">New sub version (latest x.&lt;strong&gt;&lt;span class="typo3-red"&gt;x+1&lt;/span&gt;&lt;/strong&gt;.0)</label>
+			<label index="increase_version_main">New main version (latest &lt;strong&gt;&lt;span class="typo3-red"&gt;x+1&lt;/span&gt;&lt;/strong&gt;.0.0)</label>
+			<label index="increase_version_extension_not_loaded_header">Update version</label>
+			<label index="increase_version_extension_not_loaded">The Extension has to be loaded in order to use the "update version" feature!&lt;br /&gt;Comitting is possible but version won't be incremented.</label>
 			<label index="authentication_header">Authentication</label>
 			<label index="authentication_implicit">default authentication</label>
 			<label index="authentication_explicit">authenticate as:</label>

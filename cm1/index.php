@@ -329,6 +329,16 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 		if (empty($this->modVars['include'])) {
 			return $this->commitPreview($GLOBALS['LANG']->getLL('no_files_marked'));
 		}
+		if ($this->workingCopy->isExtension() && $this->modVars['increase_version'] !== '' && t3lib_extMgm::isLoaded($this->workingCopy->getExtensionKey())) {
+			$extensionKey = $this->workingCopy->getExtensionKey();
+				// update emconf file
+			tx_npsubversion_div::increaseExtensionVersion($extensionKey, $this->modVars['increase_version']);
+				// add emconf file to include if necessary
+			$emconfFilePath = urlencode(t3lib_extMgm::extPath($extensionKey, 'ext_emconf.php'));
+			if (!in_array($emconfFilePath, $this->modVars['include'])) {
+				$this->modVars['include'][] = $emconfFilePath;
+			}
+		}
 
 		$filestatusArray = $this->svn->getFileStatusArray($this->workingCopy->getAbsolutePath());
 		if ($filestatusArray === FALSE) {
@@ -450,6 +460,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 		$content = tslib_cObj::getSubpart($this->templateCode, '###SUBPART_PRE_COMMIT###');
 		$markerArray = array();
 
+		$markerArray['###INCREASE_VERSION###'] = $this->getIncreaseVersionSubpart();
 		$markerArray['###AUTHENTICATION###'] = $this->getAuthenticationSubpart();
 
 		$filestatusArray = $this->svn->getFileStatusArray($this->workingCopy->getCurrentPath());
@@ -1131,6 +1142,42 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 		$markerArray['###ROOT_LABEL###'] = $GLOBALS['LANG']->getLL('root') . ':';
 		$markerArray['###ROOT###'] = htmlspecialchars($this->workingCopy->getRepositoryUrl());
 		$markerArray['###ROOT_CROPPED###'] = htmlspecialchars(tx_npsubversion_div::cropFromCenter($this->workingCopy->getRepositoryUrl(), 80));
+
+		return tslib_cObj::substituteMarkerArray($template, $markerArray);
+	}
+
+	/**
+	 * substitutes markers in the increase version subpart of the template
+	 *
+	 * @return string substituted update version subpart
+	 * @author Axel Boeswetter <boeswetter@portrino.de>
+	 * @author Bastian Waidelich <waidelich@network-publishing.de>
+	 */
+	protected function getIncreaseVersionSubpart() {
+		if (!$this->workingCopy->isExtension()) {
+			return '';
+		}
+		if (t3lib_extMgm::isLoaded($this->workingCopy->getExtensionKey())) {
+			$extensionVersion = tx_npsubversion_div::getExtensionVersion($this->workingCopy->getExtensionKey());
+			$template = tslib_cObj::getSubpart($this->templateCode, '###SUBPART_INCREASE_VERSION###');
+			$markerArray = array();
+			$markerArray['###HEADER###'] = $GLOBALS['LANG']->getLL('increase_version_header');
+			$markerArray['###INCREASE_VERSION_SKIP_LABEL###'] = sprintf($GLOBALS['LANG']->getLL('increase_version_skip'), $extensionVersion);
+			$markerArray['###INCREASE_VERSION_DEV_LABEL###'] = $GLOBALS['LANG']->getLL('increase_version_dev');
+			$markerArray['###INCREASE_VERSION_SUB_LABEL###'] = $GLOBALS['LANG']->getLL('increase_version_sub');
+			$markerArray['###INCREASE_VERSION_MAIN_LABEL###'] = $GLOBALS['LANG']->getLL('increase_version_main');
+			if ($this->conf['increase_version_on_commit']) {
+				$markerArray['###INCREASE_VERSION_SKIP_CHECKED###'] = '';
+				$markerArray['###INCREASE_VERSION_DEV_CHECKED###'] = ' checked="checked"';
+			} else {
+				$markerArray['###INCREASE_VERSION_SKIP_CHECKED###'] = ' checked="checked"';
+				$markerArray['###INCREASE_VERSION_DEV_CHECKED###'] = '';
+			}
+		} else {
+			$template = tslib_cObj::getSubpart($this->templateCode, '###SUBPART_INCREASE_VERSION_EXTENSION_NOT_LOADED###');
+			$markerArray['###HEADER_EXTENSION_NOT_LOADED_LABEL###'] = $GLOBALS['LANG']->getLL('increase_version_extension_not_loaded_header');
+			$markerArray['###EXTENSION_NOT_LOADED_LABEL###'] = $GLOBALS['LANG']->getLL('increase_version_extension_not_loaded');
+		}
 
 		return tslib_cObj::substituteMarkerArray($template, $markerArray);
 	}

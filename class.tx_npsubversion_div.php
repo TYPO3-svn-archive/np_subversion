@@ -22,6 +22,8 @@
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
+require_once(PATH_typo3 . 'mod/tools/em/class.em_index.php');
+
 /**
  * Utility-Class for reoccurring tasks within np_subversion
  *
@@ -135,6 +137,48 @@ class tx_npsubversion_div {
 
 		return $firstPart . '...' . $secondPart;
 	}
+
+	/**
+	 * Gets the version of an extension from extension manager
+	 *
+	 * @param string $extensionKey extension key
+	 * @return string extension version in the format "x.x.x"
+	 * @author Axel Boeswetter <boeswetter@portrino.de>
+	 * @author Bastian Waidelich <waidelich@network-publishing.de>
+	 */
+	public static function getExtensionVersion($extensionKey) {
+			// instantiate extension manager index class
+		$extensionManager = t3lib_div::makeInstance('SC_mod_tools_em_index');
+		$extensionManager->init();
+			// get extension information
+		list($extensionList) = $extensionManager->getInstalledExtensions();
+		return $extensionList[$extensionKey]['EM_CONF']['version'];
+	}
+
+	/**
+	 * Increases extension version and updates change hash in ext_emconf.php file
+	 *
+	 * @param string $extensionKey extension key
+	 * @param string $increaseVersionPart version part to increase by 1. One of "main", "sub" or "dev"
+	 * @return void
+	 * @author Axel Boeswetter <boeswetter@portrino.de>
+	 * @author Bastian Waidelich <waidelich@network-publishing.de>
+	 */
+	public static function increaseExtensionVersion($extensionKey, $increaseVersionPart) {
+			// instantiate extension manager index class
+		$extensionManager = t3lib_div::makeInstance('SC_mod_tools_em_index');
+		$extensionManager->init();
+			// get extension information
+		list($extensionList) = $extensionManager->getInstalledExtensions();
+		if (!isset($extensionList[$extensionKey]['EM_CONF']['version'])) {
+			throw new RuntimeException('can\'t retrieve extension info for extension "' . $extensionKey . '"');
+		}
+		$extensionInformation = $extensionList[$extensionKey];
+		$newVersion = current($extensionManager->renderVersion($extensionInformation['EM_CONF']['version'], $increaseVersionPart));
+		$extensionInformation['EM_CONF']['version'] = $newVersion;
+		$extensionManager->updateLocalEM_CONF($extensionKey, $extensionInformation);
+	}
+
 }
 
 if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/np_subversion/class.tx_npsubversion_div.php'])	{

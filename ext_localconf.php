@@ -13,6 +13,7 @@ $GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][$_EXTKEY]['show_svn_dirs'] = $_EXTCONF['s
 $GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][$_EXTKEY]['log_svn_commands'] = $_EXTCONF['log_svn_commands'];
 $GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][$_EXTKEY]['use_passthru'] = isset($_EXTCONF['use_passthru']) ? (boolean)$_EXTCONF['use_passthru'] : FALSE;
 $GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][$_EXTKEY]['command_suffix'] = isset($_EXTCONF['command_suffix']) ? $_EXTCONF['command_suffix'] : '2>&1';
+$GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][$_EXTKEY]['increase_version_on_commit'] = (boolean)$_EXTCONF['increase_version_on_commit'];
 
 $GLOBALS['TYPO3_CONF_VARS']['BE']['XCLASS']['typo3/class.filelistfoldertree.php'] = t3lib_extMgm::extPath($_EXTKEY) . 'xclass/class.ux_filelistfoldertree.php';
 $GLOBALS['TYPO3_CONF_VARS']['BE']['XCLASS']['typo3/class.file_list.inc'] = t3lib_extMgm::extPath($_EXTKEY) . 'xclass/class.ux_fileList.php';
