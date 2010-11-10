@@ -126,7 +126,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 		$this->model = t3lib_div::makeInstance('tx_npsubversion_model');
 
 		$this->cmd = t3lib_div::_GP('cmd');
-		$this->modVars = t3lib_div::GPvar('modVars');
+		$this->modVars = t3lib_div::_GP('modVars');
 
 			// if no working copy record can be acquired from the arguments passed to this module, we'll commit suicide
 		$initSuccess = $this->initWorkingCopy();
@@ -244,7 +244,9 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 		if ($this->cmd === 'diff') {
 			$this->doc->JScode .= '<script language="javascript" type="text/javascript" src="'. $GLOBALS['BACK_PATH'] . t3lib_extMgm::extRelPath('np_subversion') . 'cm1/diff.js"></script>';
 		}
-		$this->doc->JScode .= $this->doc->getDynTabMenuJScode();
+		if(t3lib_div::int_from_ver(TYPO3_version) < 4003000) {
+			$this->doc->JScode .= $this->doc->getDynTabMenuJScode();
+		}
 		$this->doc->postCode='
 			<script language="javascript" type="text/javascript">
 				script_ended = 1;
@@ -323,7 +325,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 	 * @author Bastian Waidelich <waidelich@network-publishing.de>
 	 */
 	protected function commit() {
-		if (!t3lib_div::GPvar('ok')) {
+		if (!t3lib_div::_GP('ok')) {
 			return $this->commitPreview();
 		}
 		if (empty($this->modVars['include'])) {
@@ -535,7 +537,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 	 * @author Bastian Waidelich <waidelich@network-publishing.de>
 	 */
 	protected function update() {
-		if (!t3lib_div::GPvar('ok')) {
+		if (!t3lib_div::_GP('ok')) {
 			return $this->updatePreview();
 		}
 		$markerArray = array();
@@ -600,7 +602,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 	 * @author Bastian Waidelich <waidelich@network-publishing.de>
 	 */
 	protected function checkout() {
-		if (!t3lib_div::GPvar('ok')) {
+		if (!t3lib_div::_GP('ok')) {
 			return $this->checkoutPreview();
 		}
 		$markerArray = array();
@@ -667,7 +669,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 	 * @author Bastian Waidelich <waidelich@network-publishing.de>
 	 */
 	protected function export() {
-		if (!t3lib_div::GPvar('ok')) {
+		if (!t3lib_div::_GP('ok')) {
 			return $this->exportPreview();
 		}
 		require_once(PATH_t3lib . 'class.t3lib_basicfilefunc.php');
@@ -914,7 +916,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 	 * @author Martin Kutschker <Martin.Kutschker@blackbox.net>
 	 */
 	protected function delete() {
-		if (!t3lib_div::GPvar('ok')) {
+		if (!t3lib_div::_GP('ok')) {
 			return $this->deletePreview();
 		}
 		$path = $this->workingCopy->getCurrentPath();
@@ -923,7 +925,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 		$args = array($path);
 		$switches = array();
 			// remove unversioned or modified files?
-		if (t3lib_div::GPvar('force')) {
+		if (t3lib_div::_GP('force')) {
 			$switches['force'] = TRUE;
 		}
 
@@ -991,7 +993,7 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 	 * @author Martin Kutschker <Martin.Kutschker@blackbox.net>
 	 */
 	protected function revert() {
-		if (!t3lib_div::GPvar('ok')) {
+		if (!t3lib_div::_GP('ok')) {
 			return $this->revertPreview();
 		}
 		if (empty($this->modVars['include'])) {

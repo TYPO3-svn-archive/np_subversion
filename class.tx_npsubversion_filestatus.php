@@ -266,10 +266,14 @@ class tx_npsubversion_filestatus {
 			$lockStatus = substr($svnStatusLine, 2, 1);
 		}
 		$obsoleteStatus = substr($svnStatusLine, 6, 1);
-
-		$filestatusClassName = t3lib_div::makeInstanceClassName('tx_npsubversion_filestatus');
-		$filestatus = new $filestatusClassName($path, $textStatus, $propertyStatus, $historyStatus, $switchStatus, $lockStatus, $obsoleteStatus);
-		return $filestatus;
+		
+		if(t3lib_div::int_from_ver(TYPO3_version) < 4003000) {
+			$filestatusClassName = t3lib_div::makeInstanceClassName('tx_npsubversion_filestatus');
+			$filestatus = new $filestatusClassName($path, $textStatus, $propertyStatus, $historyStatus, $switchStatus, $lockStatus, $obsoleteStatus);
+			return $filestatus;
+		} else {
+			return t3lib_div::makeInstance('tx_npsubversion_filestatus', $path, $textStatus, $propertyStatus, $historyStatus, $switchStatus, $lockStatus, $obsoleteStatus);
+		}
 	}
 }
 

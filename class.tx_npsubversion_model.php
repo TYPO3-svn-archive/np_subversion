@@ -120,9 +120,13 @@ class tx_npsubversion_model {
 		}
 		$workingcopies = array();
 		while(($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res))) {
-			$workingcopyClassName = t3lib_div::makeInstanceClassName('tx_npsubversion_workingcopy');
-			$workingcopy = new $workingcopyClassName($row);
-			$workingcopies[] = $workingcopy;
+			if(t3lib_div::int_from_ver(TYPO3_version) < 4003000) {
+				$workingcopyClassName = t3lib_div::makeInstanceClassName('tx_npsubversion_workingcopy');
+				$workingcopy = new $workingcopyClassName($row);
+				$workingcopies[] = $workingcopy;
+			} else {
+		    	$workingcopies[] = t3lib_div::makeInstance('tx_npsubversion_workingcopy', $row);
+			}
 		}
 		return $workingcopies;
 	}
