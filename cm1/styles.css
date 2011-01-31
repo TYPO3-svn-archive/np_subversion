@@ -299,3 +299,14 @@ del {
 	width: 10px;
 	z-index: 1000;
 }
+
+#commit input,
+#authentication_explicit input {
+    vertical-align: middle;
+}
+#username {
+    color: #000;
+    font-weight: normal;
+    margin: 0;
+    padding: 0;
+}
