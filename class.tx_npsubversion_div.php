@@ -22,12 +22,10 @@
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
-require_once(PATH_typo3 . 'mod/tools/em/class.em_index.php');
-
 /**
  * Utility-Class for reoccurring tasks within np_subversion
  *
- * 
+ *
  * @package TYPO3
  * @subpackage tx_npsubversion
  * @author Bastian Waidelich <waidelich@network-publishing.de>
@@ -148,8 +146,14 @@ class tx_npsubversion_div {
 	 */
 	public static function getExtensionVersion($extensionKey) {
 			// instantiate extension manager index class
-		$extensionManager = t3lib_div::makeInstance('SC_mod_tools_em_index');
-		$extensionManager->init();
+		if (t3lib_div::int_from_ver(TYPO3_version) >= 4005000) {
+			$extensionManager = t3lib_div::makeInstance('tx_em_Extensions_List');
+		} else {
+			require_once(PATH_typo3 . 'mod/tools/em/class.em_index.php');
+			$extensionManager = t3lib_div::makeInstance('SC_mod_tools_em_index');
+			$extensionManager->init();
+		}
+
 			// get extension information
 		list($extensionList) = $extensionManager->getInstalledExtensions();
 		return $extensionList[$extensionKey]['EM_CONF']['version'];
@@ -165,18 +169,32 @@ class tx_npsubversion_div {
 	 * @author Bastian Waidelich <waidelich@network-publishing.de>
 	 */
 	public static function increaseExtensionVersion($extensionKey, $increaseVersionPart) {
-			// instantiate extension manager index class
-		$extensionManager = t3lib_div::makeInstance('SC_mod_tools_em_index');
-		$extensionManager->init();
-			// get extension information
-		list($extensionList) = $extensionManager->getInstalledExtensions();
-		if (!isset($extensionList[$extensionKey]['EM_CONF']['version'])) {
-			throw new RuntimeException('can\'t retrieve extension info for extension "' . $extensionKey . '"');
+		if (t3lib_div::int_from_ver(TYPO3_version) >= 4005000) {
+			$extensionManager = t3lib_div::makeInstance('tx_em_Extensions_List');
+				// get extension information
+			list($extensionList) = $extensionManager->getInstalledExtensions();
+			if (!isset($extensionList[$extensionKey]['EM_CONF']['version'])) {
+				throw new RuntimeException('can\'t retrieve extension info for extension "' . $extensionKey . '"');
+			}
+			$extensionInformation = $extensionList[$extensionKey];
+			$newVersion = current(tx_em_Tools::renderVersion($extensionInformation['EM_CONF']['version'], $increaseVersionPart));
+			$extensionInformation['EM_CONF']['version'] = $newVersion;
+			$extensionDetails = t3lib_div::makeInstance('tx_em_Extensions_Details');
+			$extensionDetails->updateLocalEM_CONF($extensionKey, $extensionInformation);
+		} else {
+			require_once(PATH_typo3 . 'mod/tools/em/class.em_index.php');
+			$extensionManager = t3lib_div::makeInstance('SC_mod_tools_em_index');
+			$extensionManager->init();
+				// get extension information
+			list($extensionList) = $extensionManager->getInstalledExtensions();
+			if (!isset($extensionList[$extensionKey]['EM_CONF']['version'])) {
+				throw new RuntimeException('can\'t retrieve extension info for extension "' . $extensionKey . '"');
+			}
+			$extensionInformation = $extensionList[$extensionKey];
+			$newVersion = current($extensionManager->renderVersion($extensionInformation['EM_CONF']['version'], $increaseVersionPart));
+			$extensionInformation['EM_CONF']['version'] = $newVersion;
+			$extensionManager->updateLocalEM_CONF($extensionKey, $extensionInformation);
 		}
-		$extensionInformation = $extensionList[$extensionKey];
-		$newVersion = current($extensionManager->renderVersion($extensionInformation['EM_CONF']['version'], $increaseVersionPart));
-		$extensionInformation['EM_CONF']['version'] = $newVersion;
-		$extensionManager->updateLocalEM_CONF($extensionKey, $extensionInformation);
 	}
 
 }
