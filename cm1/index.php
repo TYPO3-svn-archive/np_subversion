@@ -680,7 +680,10 @@ class tx_nsubversion_cm1 extends t3lib_SCbase {
 				return '<div class="errorbox">Could not create target target path at "' . $this->truncatePath($this->workingCopy->getAbsolutePath()) . '".</div>';
 			}
 		}
-		$tempPath = (string)$fileFunc->getUniqueName('_tmp', $this->workingCopy->getAbsolutePath());
+		$tempPath = (string)$fileFunc->getUniqueName(
+			basename($this->workingCopy->getAbsolutePath()) . '_tmp',
+			dirname($this->workingCopy->getAbsolutePath())
+		);
 		if ($tempPath === '') {
 			return '<div class="errorbox">' . sprintf($GLOBALS['LANG']->getLL('target_path_does_not_exist'), $this->truncatePath($this->workingCopy->getAbsolutePath())) . '</div>';
 		}
